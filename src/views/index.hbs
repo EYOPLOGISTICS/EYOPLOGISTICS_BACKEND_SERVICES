@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pusher/4.2.2/pusher.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.17.1/axios.js"></script>
+  <title>Document</title>
+</head>
+<body>
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fluid">
+
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">
+        <span class="glyphicon glyphicon glyphicon-tree-deciduous"></span>
+        Nest Js
+      </a>
+    </div>
+
+  </div>
+</nav>
+<div class="container" id="app">
+  <main>
+    <div class="jumbotron">
+      <h3>Comments</h3>
+      <ul>
+        <li v-for="comment in comments">
+          134
+        </li>
+      </ul>
+    </div>
+  </main>
+  <main>
+    <div class="row">
+      <div class="col-md-8">
+        <form method="post" action="/v2/comments">
+          <div class="form-group">
+            <input type="text" class="form-control" name="message" placeholder="Type your comments">
+          </div>
+
+          <div class="form-group">
+            <button class="btn btn-success" type="submit">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<script>
+  new Vue({
+    el: "#app",
+    data() {
+      return {
+        comments: [],
+        comment: {
+          message: ""
+        }
+      };
+    },
+    created() {
+      let pusher = new Pusher("5dc49dcb74cc1f84b5fc", {
+        cluster: "eu",
+        encrypted: true
+      });
+      const channel = pusher.subscribe("comments");
+      console.log(channel)
+      channel.bind("comment_data", data => {
+        console.log(data)
+        this.comments.push(data);
+      });
+    },
+    methods: {
+      submitComment() {
+        axios.post("/v1/comments", this.comment).then((data) => {
+          console.log(data);
+        });
+      }
+    }
+  });
+
+</script>
