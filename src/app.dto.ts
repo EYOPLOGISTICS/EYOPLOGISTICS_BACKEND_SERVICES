@@ -1,4 +1,5 @@
 import { IsNotEmpty } from "class-validator";
+import {ApiProperty} from "@nestjs/swagger";
 
 export class AppDto{
   @IsNotEmpty()
@@ -11,4 +12,9 @@ export class AppDto{
 export class EnableNotificationDto{
   @IsNotEmpty()
   external_id:string;
+}
+
+export class UploadFileDto{
+  @ApiProperty({ type: "string", format: "binary" })
+  file: string;
 }

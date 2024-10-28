@@ -7,7 +7,7 @@ import {
   UpdateDateColumn
 } from "typeorm";
 
-export abstract class OsrBaseEntity extends BaseEntity {
+export abstract class EyopBaseEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

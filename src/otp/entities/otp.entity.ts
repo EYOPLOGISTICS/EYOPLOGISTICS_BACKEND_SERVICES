@@ -1,8 +1,8 @@
-import { OsrBaseEntity } from "../../abstract/osr-base-entity";
+import { EyopBaseEntity } from "../../abstract/osr-base-entity";
 import { Column, Entity } from "typeorm";
 
 @Entity('otp_s')
-export class Otp extends OsrBaseEntity{
+export class Otp extends EyopBaseEntity{
   @Column()
   otp:number
 

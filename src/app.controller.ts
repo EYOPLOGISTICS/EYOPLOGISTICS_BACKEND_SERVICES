@@ -3,26 +3,27 @@ import {
     Controller,
     Get,
     HttpStatus,
-    Param,
+    Param, ParseFilePipe,
     Post,
     Query,
     RawBodyRequest,
     Req,
-    Res,
-    UseGuards
+    Res, UploadedFile, UploadedFiles,
+    UseGuards, UseInterceptors
 } from "@nestjs/common";
 import {AppService} from "./app.service";
 import {returnErrorResponse, successResponse} from "./utils/response";
-import {AppDto, EnableNotificationDto} from "./app.dto";
+import {AppDto, EnableNotificationDto, UploadFileDto} from "./app.dto";
 import {ApiConsumes, ApiOperation, ApiResponse} from "@nestjs/swagger";
-import {SuccessResponseType} from "./enums/type.enum";
+import {ErrorResponseType, SuccessResponseType} from "./enums/type.enum";
 import {Public} from "./decorators/public-endpoint.decorator";
 import {TransactionsService} from "./transactions/transactions.service";
 import usePaystackService from "./services/paystack";
 import {getPaystackFee} from "./utils";
-import {AdminService} from "./admin/services/admin.service";
 import {useGoogleMapServices} from "./services/map";
 import {Request} from "express";
+import {AnyFilesInterceptor, FileInterceptor} from "@nestjs/platform-express";
+import {useB2FileUpload} from "./services/file-upload";
 const stripe = require('stripe')('sk_test_51PXnWmRuYEIazKf9pR04SAcOuB7hvVHOWU6F1u08LHUjHPylcRpCyzWrmeBvDq9qBvFHWrWTXytBBGj7y9zSwn7400kI8AGnlV');
 const googleMapServices = useGoogleMapServices();
 
@@ -31,34 +32,29 @@ const logger = require("./utils/logger");
 
 @Controller()
 export class AppController {
-    constructor(private readonly appService: AppService, private transactionService: TransactionsService, private adminService: AdminService) {
+    constructor(private readonly appService: AppService, private transactionService: TransactionsService) {
     }
 
-    @ApiOperation({summary: "Get all nigerian banks"})
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: SuccessResponseType,
-        description: "returns a success message with the list banks"
-    })
-    @Get("/banks")
-    async handleBanksEndpoint() {
-        return successResponse({banks: await getNigerianBanks(), message: "success"});
-    }
-
-
-    @ApiOperation({summary: "Verify bank account"})
+    @Post("upload/file")
     @ApiConsumes("multipart/form-data")
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: SuccessResponseType,
-        description: "returns a success message with the verified account name"
-    })
-    @Get("/bank/resolve")
-    async verifyBankAccount(@Query() data: AppDto) {
-        const {account_number, bank_code} = data;
-        const response = await verifyBankAccount(account_number, bank_code);
-        return successResponse({account_name: response.account_name, message: "verified"});
+    @UseInterceptors(FileInterceptor("file"))
+    async uploadFile(@Body()uploadFileDto:UploadFileDto, @UploadedFile() file: Express.Multer.File) {
+        const response = await useB2FileUpload(file.originalname, file.buffer);
+        if (!response) returnErrorResponse("Could not upload file");
+        return successResponse({ file:response, message: "uploaded file successfully" });
     }
+
+    @Post("upload/files")
+    @UseInterceptors(AnyFilesInterceptor())
+    async uploadMultipleFiles(@UploadedFiles(new ParseFilePipe({fileIsRequired: true})) files: any): Promise<SuccessResponseType> {
+       const tempFileArray = [];
+        for (const file of files) {
+            const uploaded_url = await useB2FileUpload(file.originalname, file.buffer);
+            tempFileArray.push(uploaded_url);
+        }
+        return successResponse({files:tempFileArray})
+    }
+
 
     @Public()
     @Post("/paystack/webhook")
@@ -76,44 +72,6 @@ export class AppController {
         res.sendStatus(200);
     }
 
-    @Public()
-    @Post("/stripe/webhook")
-    stripeWebHookHandler(@Res() res, @Req() req: RawBodyRequest<Request>) {
-        const secret = process.env.STRIPE_WEBHOOK_SECRET_KEY;
-        const sig = req.headers['stripe-signature'];
-        let event;
-        try {
-            event = stripe.webhooks.constructEvent(req.rawBody, sig, secret);
-        } catch (err) {
-            console.log(err)
-            res.status(400).send(`Webhook Error: ${err.message}`);
-            return;
-        }
-        // console.log(`Unhandled event type ${event.type}`);
-         this.transactionService.stripeWebhookHandler(event)
-        // Return a 200 response to acknowledge receipt of the event
-        res.send();
-    }
-
-    @Public()
-    @Post("/stripe/webhook/connect")
-    stripeConnectWebHookHandler(@Res() res, @Req() req: RawBodyRequest<Request>) {
-        const secret = process.env.STRIPE_WEBHOOK_CONNECT_SECRET_KEY;
-        const sig = req.headers['stripe-signature'];
-        let event;
-        try {
-            event = stripe.webhooks.constructEvent(req.rawBody, sig, secret);
-        } catch (err) {
-            console.log(err)
-            res.status(400).send(`Webhook Error: ${err.message}`);
-            return;
-        }
-        // console.log(`Unhandled event type ${event.type}`);
-        this.transactionService.stripeWebhookHandler(event)
-        // Return a 200 response to acknowledge receipt of the event
-        res.send();
-    }
-
 
     @Public()
     @Get("/paystack/callback")
@@ -123,18 +81,6 @@ export class AppController {
         res.sendStatus(200);
     }
 
-    @ApiOperation({summary: "Calculate paystack fee"})
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: SuccessResponseType,
-        description: "returns a success message with calculated amount"
-    })
-    @Public()
-    @Get("/calculator")
-    calculator(@Query("amount") amount: number) {
-        const {paystack_amount, applicable_fee} = getPaystackFee(amount);
-        return successResponse({paystack_fee: applicable_fee, paystack_amount: Math.round(paystack_amount)});
-    }
 
 
 

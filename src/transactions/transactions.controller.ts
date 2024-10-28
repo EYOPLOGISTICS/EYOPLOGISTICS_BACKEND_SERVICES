@@ -70,10 +70,4 @@ export class TransactionsController {
     return this.transactionsService.initialiseStripeTransaction(user, initializeStripeTransactionDto);
   }
 
-  // @Public()
-  @Post('stripe/charge-card')
-  chargeCard(@AuthUser() user:User){
-    return this.transactionsService.chargeCard(user)
-  }
-
 }

@@ -1,9 +1,9 @@
 import {Column, Entity, OneToMany} from "typeorm";
-import { OsrBaseEntity } from "../../abstract/osr-base-entity";
+import { EyopBaseEntity } from "../../abstract/osr-base-entity";
 import {Transaction} from "../../transactions/entities/transaction.entity";
 
 @Entity('cards')
-export class Card extends OsrBaseEntity{
+export class Card extends EyopBaseEntity{
   @Column({nullable:false})
   auth_code:string
 

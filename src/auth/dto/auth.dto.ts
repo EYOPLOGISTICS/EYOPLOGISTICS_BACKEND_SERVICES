@@ -1,5 +1,6 @@
-import {IsEmail, IsNotEmpty, IsNumber, IsString, ValidateIf} from "class-validator";
+import {IsEmail, IsNotEmpty, IsNumber, IsString, ValidateIf, IsEnum, MinLength} from "class-validator";
 import {Transform, TransformFnParams} from "class-transformer";
+import {Role} from "../../enums/role.enum";
 
 
 export class LoginDto {
@@ -9,20 +10,9 @@ export class LoginDto {
     @Transform(({value}) => value.trim().toLowerCase())
     email: string;
 
-    // @ValidateIf((data) => !data.email)
-    @IsNotEmpty({message:'please input a valid phone number'})
-    @IsString()
-    phone_number: string;
-
     @IsNotEmpty()
-    @Transform(({value}) => {
-        if (typeof value === 'string') {
-            return parseInt(value)
-        }
-    })
-    otp: string;
-
-    password?: string;
+    @MinLength(6)
+    password: string;
 
 }
 
@@ -39,6 +29,17 @@ export class AdminLoginDto {
 
 }
 
+export class VerifyOtpDto {
+    @IsNotEmpty()
+    @IsEmail()
+    @Transform(({value}) => value.trim().toLowerCase())
+    email: string;
+
+
+    @IsNotEmpty()
+    otp: number;
+}
+
 export class AuthPusherDto {
     @IsNotEmpty()
     socket_id: string;
@@ -48,16 +49,30 @@ export class AuthPusherDto {
 
 }
 
-export class GetStartedDto {
-    // @ValidateIf((data) => !data.phone_number)
+export class SignUpDto {
+    @IsNotEmpty()
+    @Transform(({value}) => value.trim().toLowerCase())
+    first_name: string;
+
+    @IsNotEmpty()
+    @Transform(({value}) => value.trim().toLowerCase())
+    last_name: string;
+
     @IsNotEmpty()
     @IsEmail()
     @Transform(({value}) => value.trim().toLowerCase())
     email: string;
 
+    @IsNotEmpty()
+    @MinLength(6)
+    password: string;
+
     // @ValidateIf((data) => !data.email)
     @IsNotEmpty({message:'Please input a valid phone number'})
-    @IsString()
     // @Transform(({value}) => value.trim().toLowerCase())
     phone_number: string;
+
+    @IsNotEmpty()
+    @IsEnum(Role)
+    role:Role
 }

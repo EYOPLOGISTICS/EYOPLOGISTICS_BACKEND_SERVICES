@@ -1,6 +1,6 @@
 import {Body, Controller, Get, HttpStatus, Post, Res} from "@nestjs/common";
 import {AuthService} from "./auth.service";
-import {AuthPusherDto, GetStartedDto, LoginDto} from "./dto/auth.dto";
+import {AuthPusherDto, LoginDto, SignUpDto, VerifyOtpDto} from "./dto/auth.dto";
 import {Public} from "../decorators/public-endpoint.decorator";
 import {UsersService} from "../users/users.service";
 import {successResponse} from "../utils/response";
@@ -11,9 +11,7 @@ import {User} from "../users/entities/user.entity";
 import {DOMAIN} from "../decorators/domain.decorator";
 import {usePusher} from "../services/pusher";
 import {QueueService} from "../queues/queue.service";
-import {sendWhatsAppMessage} from "../services/sms";
 import {RatingsService} from "../ratings/ratings.service";
-import {GETVERSION} from "../decorators/version.decorator";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -22,44 +20,28 @@ export class AuthController {
     }
 
     @Public()
-    @ApiOperation({summary: "Get started", description: "Get started with phone number or email"})
-    @ApiResponse({status: HttpStatus.OK, type: SuccessResponseType, description: "returns a success message"})
-    @ApiResponse({status: HttpStatus.BAD_REQUEST, type: ErrorResponseType})
-    @Post("/get-started")
-    async handleGetStarted(@DOMAIN() domain: DOMAIN_TYPE, @Body() getStartedDto: GetStartedDto): Promise<SuccessResponseType | ErrorResponseType> {
-        await this.authService.handleGetStarted(domain, getStartedDto);
+    @Post("/signup")
+    signup(@Body() signupDto: SignUpDto): Promise<SuccessResponseType | ErrorResponseType> {
+        return this.authService.signUp(signupDto);
+    }
+
+    @Public()
+    @Post('/otp/send')
+    async sendOtp(@Body('email') email:string): Promise<SuccessResponseType | ErrorResponseType> {
+        await this.authService.sendOtp(email)
         return successResponse("Otp sent successfully");
     }
 
     @Public()
-    @Post('/send-otp')
-    async sendOtp(@Body('phone_number') phone_number: string): Promise<SuccessResponseType | ErrorResponseType> {
-        await sendWhatsAppMessage(`${phone_number ?? 2348184989663}`, 'Testing send charm')
-        return successResponse("Otp sent successfully");
+    @Post("/otp/verify")
+    verifyOtp(@Body() verifyOtpDto: VerifyOtpDto): Promise<SuccessResponseType | ErrorResponseType> {
+        return this.authService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otp);
     }
 
     @Public()
-    @ApiOperation({summary: "Login", description: "Login with otp, phone number or email"})
-    @ApiResponse({
-        status: HttpStatus.OK,
-        type: SuccessResponseType,
-        description: "returns the user data with an access token"
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        type: ErrorResponseType,
-        description: "Invalid request or validation errors"
-    })
-    @ApiResponse({
-        status: HttpStatus.NOT_FOUND,
-        type: ErrorResponseType,
-        description: "User does not exist"
-    })
     @Post("login")
-    signIn(@Body() loginDto: LoginDto, @DOMAIN() domain: DOMAIN_TYPE) {
-        const {email, phone_number, otp} = loginDto;
-        console.log("hitting login endpoint");
-        return this.authService.login(domain, parseInt(otp), email.trim(), phone_number);
+    signIn(@Body() loginDto: LoginDto) {
+        return this.authService.login(loginDto);
     }
 
 
@@ -68,20 +50,17 @@ export class AuthController {
         summary: "Pusher authentication",
         description: "pusher authentication endpoint for private channels"
     })
-    authoriseUserWithPusher(@Res() res, @Body() authPusherDto: AuthPusherDto, @DOMAIN() domain: DOMAIN_TYPE, @GETVERSION() version) {
+    authoriseUserWithPusher(@Res() res, @Body() authPusherDto: AuthPusherDto) {
         const pusher = usePusher();
         const socketId = authPusherDto.socket_id;
         const channel = authPusherDto.channel_name;
         const authResponse = pusher.authorizeChannel(socketId, channel);
-        console.log(domain === DOMAIN_TYPE.RIDER && !version ? authResponse : successResponse(authResponse))
-        res.send(domain === DOMAIN_TYPE.RIDER && !version ? authResponse : successResponse(authResponse));
+        res.send(successResponse(authResponse));
     }
 
 
     @Get("user")
     async isLoggedIn(@AuthUser() user: User) {
-        const {total_rating} = await this.ratingService.getRiderRatingStats(user.id)
-        user['rating'] = total_rating;
         return successResponse({user, is_logged_in: true});
     }
 }

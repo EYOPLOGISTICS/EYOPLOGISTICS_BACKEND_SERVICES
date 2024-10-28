@@ -9,11 +9,6 @@ import {
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {join} from "path";
 import {AllExceptionFilter} from "./utils/all-exception.filter";
-import {useGoogleMapServices} from "./services/map";
-import {NewRequest} from "./trips/entities/new-request.entity";
-import {BetweenDates, useDayJs} from "./utils";
-import {Between} from "typeorm";
-import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
     try {
@@ -30,8 +25,8 @@ async function bootstrap() {
         app.setGlobalPrefix("v1");
         app.useGlobalFilters(new AllExceptionFilter());
         const config = new DocumentBuilder()
-            .setTitle("OSR Cruise")
-            .setDescription("OSR Cruise API Documentation")
+            .setTitle("EyopLogistics")
+            .setDescription("EyopLogistics API Documentation")
             .setVersion("1.0")
             .build();
 

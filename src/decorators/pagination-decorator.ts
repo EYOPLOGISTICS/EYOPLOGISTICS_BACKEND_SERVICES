@@ -7,7 +7,7 @@ export class PaginationDto {
 
 
 
-export const PaginationParams = createParamDecorator(
+export const GetPagination = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const response = new PaginationDto();

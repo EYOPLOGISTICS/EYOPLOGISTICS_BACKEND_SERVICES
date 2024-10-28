@@ -1,7 +1,6 @@
-import {DOMAIN_TYPE} from "../enums/type.enum";
-import {Role} from "../enums/role.enum";
 import {Between, LessThan, MoreThan, MoreThanOrEqual} from "typeorm";
 import {format, addYears} from "date-fns";
+const slugify = require("slugify");
 
 const dayjs = require("dayjs");
 dayjs().format();
@@ -141,10 +140,10 @@ export const generateTrackingCode = () => {
 
 export const getPaystackFee = (amount): { applicable_fee: number, paystack_amount: number } => {
     const decimal_fee = 1.5 / 100;
-    const applicable_fee = decimal_fee * amount;
+    const applicableFee = decimal_fee * amount;
     let paystack_amount = 0;
-    applicable_fee > 2000 ? paystack_amount = amount + 2000 : paystack_amount = amount / (1 - decimal_fee) + 0.01;
-    return {applicable_fee, paystack_amount};
+    applicableFee > 2000 ? paystack_amount = amount + 2000 : paystack_amount = amount / (1 - decimal_fee) + 0.01;
+    return {applicable_fee: applicableFee > 2000 ? 2000 : applicableFee, paystack_amount};
 };
 export const start = new Date().setUTCHours(0, 0, 0, 0);
 export const end = moment().format("YYYY-MM-DD 23:59:59");
@@ -166,11 +165,19 @@ export const DAYS_OF_THE_WEEK = {
     FRIDAY: 4,
     SATURDAY: 5,
     SUNDAY: 6
-};
+}
 
-export const getRoleFromDomain = (domain) => {
-    return domain === DOMAIN_TYPE.DRIVER ? Role.DRIVER : domain === DOMAIN_TYPE.ADMIN ? Role.ADMIN : Role.RIDER;
-};
+
+export function useSlugify(string) {
+    return slugify(string, {
+        replacement: "-",  // replace spaces with replacement character, defaults to `-`
+        remove: undefined, // remove characters that match regex, defaults to `undefined`
+        lower: true,      // convert to lower case, defaults to `false`
+        strict: false,     // strip special characters except replacement, defaults to `false`
+        locale: "vi",       // language code of the locale to use
+        trim: true         // trim leading and trailing replacement chars, defaults to `true`
+    });
+}
 
 
 

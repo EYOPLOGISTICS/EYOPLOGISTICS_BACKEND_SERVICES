@@ -1,6 +1,5 @@
 import { CURRENCIES, STATUS, TRANSACTION_METHOD, TRANSACTION_TYPE } from "../../enums/type.enum";
 import { IsNotEmpty } from "class-validator";
-import { Driver } from "../../drivers/entities/driver.entity";
 
 export class CreateTransactionDto {
   type:TRANSACTION_TYPE;

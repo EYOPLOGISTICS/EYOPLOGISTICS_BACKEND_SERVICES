@@ -19,7 +19,7 @@ export const useB2FileUpload = async (filename: string, file: any) => {
     const options = {
       uploadUrl: uploadUrl,
       uploadAuthToken: authToken,
-      fileName: filename+Date.now(),
+      fileName: Date.now()+filename,
       data: file,
       onUploadProgress: null
     }

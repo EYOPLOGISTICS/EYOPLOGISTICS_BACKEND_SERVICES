@@ -21,7 +21,7 @@ export class AuthGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         console.log(request.path)
         console.log(`osr-version ${request.headers['osr-version']}`)
-        if (!this.isValidDomain(request) && !request.path.includes("webhook")) throw new UnauthorizedException();
+        // if (!this.isValidDomain(request) && !request.path.includes("webhook")) throw new UnauthorizedException();
         // if(!this.isCurrentVersion(request) && !request.path.includes("webhook")) returnErrorResponse('We\'ve just released a new update for the app which includes some great new features! To make sure you\'re getting the most out of the app, we recommend you update the app.')
         if (isPublic) {
             return true;
@@ -38,7 +38,6 @@ export class AuthGuard implements CanActivate {
                 }
             );
             request["sub"] = payload.sub;
-            if (!this.authService.isDomainMatchingUserRole(payload.username, request["DM"])) new Error();
         } catch {
             throw new UnauthorizedException();
         }

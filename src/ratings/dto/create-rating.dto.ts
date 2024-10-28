@@ -2,7 +2,7 @@ import { IsEnum, IsInt, IsNotEmpty, Max, Min, ValidateIf } from "class-validator
 import { TRANSACTION_METHOD } from "../../enums/type.enum";
 import { Transform } from "class-transformer";
 
-export class RateTripDto {
+export class RateProductDto {
   @IsNotEmpty()
   @IsInt()
   @Min(1)

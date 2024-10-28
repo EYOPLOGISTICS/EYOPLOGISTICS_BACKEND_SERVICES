@@ -3,14 +3,10 @@ import { TransactionsService } from './transactions.service';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Transaction } from "./entities/transaction.entity";
 import { TransactionsController } from "./transactions.controller";
-import { DriversModule } from "../drivers/drivers.module";
-import { DriversService } from "../drivers/drivers.service";
-
 @Global()
 @Module({
-  imports:[DriversModule, TypeOrmModule.forFeature([Transaction])],
   controllers:[TransactionsController],
-  providers: [TransactionsService, DriversService],
+  providers: [TransactionsService],
   exports:[TransactionsService]
 })
 export class TransactionsModule {}

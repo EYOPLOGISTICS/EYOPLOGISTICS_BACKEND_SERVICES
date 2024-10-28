@@ -6,12 +6,8 @@ import { AuthController } from "./auth.controller";
 import { jwtConstant } from "../utils/";
 import { APP_GUARD } from "@nestjs/core";
 import { AuthGuard } from "./auth.guard";
-import { DriversModule } from "../drivers/drivers.module";
-import { DriversService } from "../drivers/drivers.service";
-
 @Module({
   imports: [
-    DriversModule,
     UsersModule,
     JwtModule.register({
       global: true,
@@ -22,7 +18,7 @@ import { DriversService } from "../drivers/drivers.service";
   providers: [{
     provide: APP_GUARD,
     useClass: AuthGuard
-  }, AuthService,DriversService],
+  }, AuthService],
   // providers: [ AuthService],
   controllers: [AuthController],
   exports: [AuthService]

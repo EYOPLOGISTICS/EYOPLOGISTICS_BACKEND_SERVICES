@@ -11,8 +11,7 @@ import {
     PAYSTACK_WEBHOOK_EVENTS,
     STATUS,
     SuccessResponseType,
-    TRANSACTION_METHOD,
-    TRANSACTION_TYPE
+    TRANSACTION_METHOD, TRANSACTION_TYPE,
 } from "../enums/type.enum";
 import {User} from "../users/entities/user.entity";
 import {returnErrorResponse, successResponse} from "../utils/response";
@@ -20,13 +19,9 @@ import {UsersService} from "../users/users.service";
 import {Card} from "../cards/entities/card.entity";
 import {NotificationsService} from "../notifications/notifications.service";
 import {usePusher} from "../services/pusher";
-import {DriversService} from "../drivers/drivers.service";
-import {Trip} from "../trips/entities/trip.entity";
 import usePaystackService from "../services/paystack";
 import {getPaystackFee, SUPPORTED_COUNTRIES} from "../utils";
-import {RideSharingOrder} from "../ride_sharing/entities/ride_sharing_order.entity";
 import {useStripePaymentGateway} from "../services/stripe";
-import {BankDetails} from "../drivers/entities/bank_details.entity";
 import {UseOneSignal} from "../services/one-signal";
 
 const {verifyTransaction, initializeTransaction} = usePaystackService;
@@ -35,7 +30,7 @@ const pusher = usePusher();
 
 @Injectable()
 export class TransactionsService {
-    constructor(@Inject(forwardRef(() => UsersService)) private userService: UsersService, private notificationsService: NotificationsService, @Inject(forwardRef(() => DriversService)) private driverService: DriversService) {
+    constructor(@Inject(forwardRef(() => UsersService)) private userService: UsersService, private notificationsService: NotificationsService) {
     }
 
     async create(createTransactionDto: CreateTransactionDto): Promise<Transaction> {
@@ -90,106 +85,11 @@ export class TransactionsService {
                 case "wallet_funding":
                     this.fundWallet(payload.data);
                     break;
-                case "trip_payment":
-                    this.makeTripPaymentViaWebhook(payload.data);
-                    break;
-                case "tip_payment":
-                    this.tipDriverViaWebhook(payload.data);
-                    break;
-                case "ride_sharing":
-                    this.handleRideSharing(payload.data)
 
             }
         }
 
         if (payload.event === PAYSTACK_WEBHOOK_EVENTS.TRANSFER_SUCCESS || payload.event === PAYSTACK_WEBHOOK_EVENTS.TRANSFER_FAILED || payload.event === PAYSTACK_WEBHOOK_EVENTS.TRANSFER_REVERSED) this.handleTransfersViaWebhook(payload);
-    }
-
-    async stripeWebhookHandler(event) {
-        switch (event.type) {
-            case 'checkout.session.completed':
-                this.handleCheckoutSessionCompleted(event)
-                break;
-            case 'account.updated' :
-                this.handleAccountUpdatedEvent(event)
-                break;
-        }
-    }
-
-    async handleAccountUpdatedEvent(event) {
-        const account = await BankDetails.findOne({where: {stripe_account_id: event.data.object.id}})
-        if (account && !account.details_submitted) {
-            console.log(`updating account - ${event.data.object.payouts_enabled}`)
-            account.transfer_enabled = event.data.object.payout_enabled;
-            account.details_submitted = event.data.object.details_submitted;
-            const bankObj = event.data.object.external_accounts.data[0]
-            account.account_name = bankObj.account_holder_name;
-            account.bank_name = bankObj.bank_name;
-            account.account_number = bankObj.last4;
-            account.currency = bankObj.currency;
-            account.routing_no = bankObj.routing_number;
-            await account.save();
-            if (event.data.object.details_submitted && event.data.object.payout_enabled) {
-                const count = await BankDetails.count({where: {driver_id: account.driver_id}})
-                UseOneSignal().sendNotificationToDriver('Account connected successfully', `Your bank account has been connected successfully with Osr Cruise ${count > 1 ? ', you can now make withdrawals from your wallet into your connected account' : ''}`, account.driver_id, {})
-            }
-        }
-    }
-
-    async handleCheckoutSessionCompleted(event) {
-        const stripeService = useStripePaymentGateway();
-        if (event.data.object.metadata.transaction_type === 'fund_wallet') {
-            const event_data = event.data.object
-            const user_id = event_data.metadata.user_id;
-            const session_id = event_data.id;
-            const amount = event_data.amount_total;
-            const user = await User.findOne({where: {id: user_id}})
-            if (user) {
-                const checkout = await stripeService.retrieveSession(session_id)
-                if (checkout && checkout.payment_status !== 'unpaid') {
-                    await this.userService.creditUserWallet(user, amount)
-                }
-            }
-        } else if
-        (event.data.object.mode === 'setup') {
-            const setupIntent = await stripeService.retrieveSetupIntent(event.data.object.setup_intent)
-            if (!setupIntent) return
-            const user = await User.findOne({
-                where: {customer_id: setupIntent.customer},
-                select: {id: true, customer_id: true}
-            })
-            if (user) {
-                if (!await Card.findOneBy({payment_method: setupIntent.payment_method})) {
-                    const newlyAddedPaymentMethod = await stripeService.retrievePaymentMethod(setupIntent.payment_method)
-                    await Card.update({user_id: user.id, default: true}, {default: false})
-                    const paymentMethod = new Card();
-                    paymentMethod.payment_method = setupIntent.payment_method;
-                    paymentMethod.user_id = user.id;
-                    paymentMethod.last4 = newlyAddedPaymentMethod.card.last4.toString();
-                    paymentMethod.card_type = newlyAddedPaymentMethod.card.brand;
-                    paymentMethod.brand = newlyAddedPaymentMethod.card.brand;
-                    paymentMethod.funding = newlyAddedPaymentMethod.card.funding;
-                    paymentMethod.exp_year = newlyAddedPaymentMethod.card.exp_year.toString();
-                    paymentMethod.exp_month = newlyAddedPaymentMethod.card.exp_month.toString();
-                    paymentMethod.name = newlyAddedPaymentMethod.billing_details.name;
-                    paymentMethod.default = true;
-                    await paymentMethod.save();
-                }
-            }
-        }
-    }
-
-
-    async handleRideSharing(payload: any) {
-        const order_id = payload.metadata.order_id;
-        const ride_sharing_order = await RideSharingOrder.findOne({
-            where: {id: order_id},
-            select: ['id', 'paid', 'user_id', 'booked_by']
-        })
-        ride_sharing_order.paid = true;
-        ride_sharing_order.payment_type = payload.authorization.channel;
-        await ride_sharing_order.save();
-        // send mails
     }
 
     async handleTransfersViaWebhook(payload: any): Promise<void> {
@@ -233,18 +133,13 @@ export class TransactionsService {
             // if (paystack_amount < amount) return false;
             amount = amount_paid;
         }
-        let user = await this.userService.findOne(user_id, ["id", "wallet_balance", "role", "currency_symbol"]);
-        if (!user) {
-            // check if it's a driver and then get his user data
-            driver = await this.driverService.findOne(user_id, ["id", "user_id"]);
-            if (driver) user = await this.userService.findOne(driver.user_id, ["id", "wallet_balance", "role", "currency_symbol"]);
-        }
+        const user = await this.userService.findOne(user_id, ["id", "wallet_balance", "role", "currency_symbol"]);
         if (user) {
             const card = data.authorization.channel === TRANSACTION_METHOD.CARD ? await this.saveCard(data, user) : null;
             await this.create({
                 payment_reference: data.reference,
                 title: `DEBIT`,
-                type: TRANSACTION_TYPE.DEBIT,
+                type: TRANSACTION_TYPE.CREDIT,
                 user_id: user.id,
                 card_id: card ? card.id : null,
                 method: data.channel,
@@ -252,73 +147,9 @@ export class TransactionsService {
                 amount
             });
             await this.userService.creditUserWallet(user, amount);
-            if (driver) this.driverService.checkIfDriverHasPendingPaymentAndDebit(driver);
         }
     }
 
-    async tipDriverViaWebhook(data: any) {
-        const trip_id = data.metadata.trip_id;
-        let amount = data.amount / 100;
-        const amount_paid = parseInt(data.metadata.amount_paid);
-        if (amount_paid) {
-            const {paystack_amount} = getPaystackFee(amount_paid);
-            if (paystack_amount < amount) return false;
-            amount = amount_paid;
-        }
-        const trip = await Trip.findOne({
-            where: {id: trip_id},
-            select: ["id", "driver_id", "origin_address", "destination_address"]
-        });
-        if (trip) {
-            const driver = await this.driverService.findOne(trip.driver_id);
-            await this.driverService.tipDriver(driver, trip, amount);
-            const rider = await this.userService.findOne(trip.user_id, ["id"]);
-            const card = data.authorization.channel === TRANSACTION_METHOD.CARD ? await this.saveCard(data, rider) : null;
-            await this.create({
-                payment_reference: data.reference,
-                title: `DEBIT`,
-                type: TRANSACTION_TYPE.DEBIT,
-                user_id: rider.id,
-                card_id: card ? card.id : null,
-                method: TRANSACTION_METHOD.CARD,
-                status: STATUS.SUCCESS,
-                amount
-            });
-        }
-
-    }
-
-    async makeTripPaymentViaWebhook(data: any) {
-        const amount = data.amount / 100;
-        const trip_id = data.metadata.trip_id;
-        const trip = await Trip.findOne({
-            where: {id: trip_id},
-            select: ["driver_id", "user_id", "id", "payment_status"]
-        });
-        if (trip) {
-            const user = await this.userService.findOne(trip.user_id, ["id"]);
-            trip.payment_status = STATUS.PAID;
-            await trip.save();
-            const card = data.authorization.channel === TRANSACTION_METHOD.CARD ? await this.saveCard(data, user) : null;
-            await this.create({
-                payment_reference: data.reference,
-                title: `DEBIT`,
-                type: TRANSACTION_TYPE.DEBIT,
-                user_id: user.id,
-                card_id: card ? card.id : null,
-                method: data.channel,
-                status: STATUS.SUCCESS,
-                amount
-            });
-            await this.notificationsService.create({
-                user: user,
-                message: `Payment for ${trip.origin_address} to ${trip.destination_address} ride`,
-                title: "Ride Payment"
-            });
-        } else {
-            console.log("trip not found");
-        }
-    }
 
     async verifyTransaction(user: User, verifyTransactionDto: VerifyTransactionDto): Promise<SuccessResponseType> {
         const verified = await verifyTransaction(verifyTransactionDto.payment_reference, user);

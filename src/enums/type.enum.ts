@@ -1,31 +1,32 @@
 import { HttpStatus } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
-export enum TRIP_STATUS {
+export enum PAYMENT_METHOD {
+  CARD = "card",
+  ONLINE = "online",
+}
+
+export enum ORDER_TIMELINE {
+  PROCESSING = "processing",
+}
+
+export enum ORDER_STATUS {
   PENDING = "pending",
-  FINDING_DRIVERS = "finding_drivers",
-  ACCEPTED = "accepted",
-  ONGOING = "has_started",
-  ARRIVED = "driver_arrived",
+  ONGOING = "ongoing",
   COMPLETED = "completed",
-  CANCELED = "canceled",
-  ALL = "all",
-  SCHEDULED = "scheduled",
-  RECURRING = "recurrent",
-  UPCOMING = "upcoming",
+  CANCELLED = "cancelled"
+
 }
 
-
-export enum OFFER_STATUS {
+export enum PAYMENT_STATUS {
+  PAID = "paid",
   PENDING = "pending",
-  ACCEPTED = "accepted",
+  FAILED = "failed",
+  REFUNDED = 'refunded'
 }
-
-export enum TRANSACTION_TYPE {
-  DEBIT = "debit",
-  CREDIT = "credit",
-
-  TRANSFER = "TRANSFER",
+export enum SHIPPING_METHOD {
+  WALK_IN = "walk_in",
+  HOME_DELIVERY = "home_delivery",
 }
 
 export enum PAYSTACK_WEBHOOK_EVENTS {
@@ -49,6 +50,11 @@ export enum TRANSACTION_METHOD {
   USSD = "ussd",
 
   CASH = "cash"
+}
+
+export enum TRANSACTION_TYPE {
+  CREDIT = "credit",
+  DEBIT = "debit",
 }
 
 export enum PAYMENT_TYPE {

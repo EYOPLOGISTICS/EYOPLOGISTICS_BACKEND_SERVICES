@@ -1,10 +1,10 @@
-import {OsrBaseEntity} from "../../abstract/osr-base-entity";
+import {EyopBaseEntity} from "../../abstract/osr-base-entity";
 import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {CURRENCIES, STATUS, TRANSACTION_METHOD, TRANSACTION_TYPE} from "../../enums/type.enum";
 import {Card} from "../../cards/entities/card.entity";
 
 @Entity("transactions")
-export class Transaction extends OsrBaseEntity {
+export class Transaction extends EyopBaseEntity {
     @Column({nullable: false})
     type: TRANSACTION_TYPE;
 

@@ -2,22 +2,14 @@ import { Process, Processor } from "@nestjs/bull";
 import { Job } from "bull";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { sendMail } from "../../services/nodemailer";
-import { DriversService } from "../../drivers/drivers.service";
 import { usePusher } from "../../services/pusher";
 import { useGoogleMapServices } from "../../services/map";
-import { TripsService } from "../../trips/trips.service";
-import { Trip } from "../../trips/entities/trip.entity";
-import { STATUS } from "../../enums/type.enum";
-import { Driver } from "../../drivers/entities/driver.entity";
-import * as console from "console";
 
 const pusher = usePusher();
-const { calculateDistanceMatrix, formatLatAndLng } = useGoogleMapServices();
+const {formatLatAndLng } = useGoogleMapServices();
 
 @Processor("trip-queue")
 export class TripProcessor {
-  constructor(private driverService: DriversService, private tripService: TripsService) {
-  }
 
   // @Process("dispatch-trip-to-nearby-available-drivers")
   // async dispatchTripToNearbyAvailableDrivers(job: Job, skip_val?: number, take_val?: number) {
@@ -72,12 +64,5 @@ export class TripProcessor {
   async testQueue(job: Job) {
     console.log("ruuning queue");
     console.log(job.data);
-  }
-
-  @Process("upload-vehicle-inspection-points")
-  async processUploadVehicleInspectionPoints(job: Job) {
-    const files = job.data.files;
-    const driver = job.data.driver;
-    await this.driverService.uploadDriverVehicleInspectionPoints(driver, files);
   }
 }
