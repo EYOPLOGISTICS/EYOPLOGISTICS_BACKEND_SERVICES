@@ -127,9 +127,14 @@ export class OrdersService {
         let deliveryFee = 0;
         let km = 0;
         let duration: string;
+        console.log(origin)
+        console.log(destination)
         if (shipping_method && shipping_method === SHIPPING_METHOD.HOME_DELIVERY) {
+            console.log('home delivery')
             const googleService = useGoogleMapServices()
             const response = await googleService.calculateDeliveryFee(googleService.formatLatAndLng(origin.lat, origin.lng), googleService.formatLatAndLng(destination.lat, destination.lng))
+            console.log(`delivery fee - ${response.delivery_fee}`)
+            console.log(`km - ${response.km}`)
             deliveryFee = response.delivery_fee;
             km = response.km;
             duration = response.duration;

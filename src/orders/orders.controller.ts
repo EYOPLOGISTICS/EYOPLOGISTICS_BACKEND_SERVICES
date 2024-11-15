@@ -17,7 +17,7 @@ export class OrdersController {
     @Post('/checkout')
     async checkout(@Body() checkOutDto: CheckOutDto) {
         const {service_fee, total, km, delivery_fee, duration} = await this.ordersService.checkout(checkOutDto)
-        return successResponse({service_fee, total, km, delivery_fee, duration})
+        return successResponse({checkout_data:{service_fee, total, km, delivery_fee, duration}})
     }
 
     @Post()

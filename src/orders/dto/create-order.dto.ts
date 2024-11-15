@@ -3,7 +3,6 @@ import {ORDER_STATUS, PAYMENT_METHOD, SHIPPING_METHOD} from "../../enums/type.en
 import {ApiProperty} from "@nestjs/swagger";
 import {MapDto} from "../../vendors/dto/create-vendor.dto";
 import {PaginationDto} from "../../decorators/pagination-decorator";
-
 export class CreateOrderDto {
     @IsNotEmpty()
     @ApiProperty({enum:PAYMENT_METHOD})

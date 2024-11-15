@@ -1,6 +1,7 @@
 import {EyopBaseEntity} from "../../abstract/osr-base-entity";
-import {Column, Entity, OneToMany} from "typeorm";
+import {Column, Entity, JoinColumn, OneToMany, OneToOne} from "typeorm";
 import {CartProduct} from "./cart-products.entity";
+import {Vendor} from "../../vendors/entities/vendor.entity";
 
 @Entity('carts')
 export class Cart extends EyopBaseEntity{
@@ -15,4 +16,8 @@ export class Cart extends EyopBaseEntity{
 
     @OneToMany(() => CartProduct, (products) => products.cart)
     cart_products:CartProduct[]
+
+    @OneToOne(() => Vendor, (vendor) => vendor, )
+    @JoinColumn({name:'vendor_id'})
+    vendor:Vendor
 }

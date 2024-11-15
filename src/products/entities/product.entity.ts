@@ -1,5 +1,5 @@
 import {EyopBaseEntity} from "../../abstract/osr-base-entity";
-import {Column, Entity, ManyToOne, OneToMany} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany} from "typeorm";
 import {Image} from "./images.entity";
 import {Vendor} from "../../vendors/entities/vendor.entity";
 import {Rating} from "../../ratings/entities/rating.entity";
@@ -60,6 +60,7 @@ export class Product extends EyopBaseEntity {
     @ManyToOne(() => Vendor, (vendor) => vendor, {
         onDelete:'CASCADE'
     })
+    @JoinColumn({name:'vendor_id'})
     vendor:Vendor
 
 }

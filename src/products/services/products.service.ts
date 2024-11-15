@@ -71,11 +71,18 @@ export class ProductsService {
         if (category) conditions['category_id'] = category;
         if (sub_category) conditions['sub_category_id'] = sub_category;
         if (vendor) conditions['vendor_id'] = vendor;
+        let select = {}
+        select = {vendor: {verified: true, name: true, logo: true, id:true, location:true}}
         const [products, count] = await Product.findAndCount({
+            relations: {vendor: true, images: true},
+            select,
             where: conditions,
             skip: pagination.offset,
             take: pagination.limit
         })
+        for(const product of products){
+            product['ratings'] = await Rating.find({where: {product_id: product.id}, take: 1, order: {created_at: 'DESC'}, relations:{user:true}, select:{user:{full_name:true, profile_picture:true, id:true}}})
+        }
         return {products, total_rows: count}
     }
 
@@ -86,7 +93,7 @@ export class ProductsService {
             select: {vendor: {verified: true, name: true, logo: true}}
         })
         if (!product) returnErrorResponse('product does not exist')
-        product['reviews'] = await Rating.find({where: {product_id: product.id}, take: 1, order: {created_at: 'DESC'}})
+        product['ratings'] = await Rating.find({where: {product_id: product.id}, take: 1, order: {created_at: 'DESC'}})
         return successResponse({product})
     }
 

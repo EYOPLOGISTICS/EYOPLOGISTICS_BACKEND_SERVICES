@@ -11,13 +11,17 @@ export class CartService {
         const product = await Product.findOne({where: {id: productId}})
         if (!product) returnErrorResponse('Product does not exist')
         const cart = await this.getCart(user.id)
-        console.log(cart)
+        if (cart.vendor_id && cart.vendor_id !== product.vendor_id) returnErrorResponse('This product belongs to a different vendor')
         if (await this.productAlreadyInCart(productId, cart.id)) {
             return this.incrementProductInCart(productId, cart.id)
         } else {
             const cartProduct = new CartProduct();
             cartProduct.product_quantity = 1;
             cartProduct.product_id = product.id;
+            if (!cart.vendor_id) {
+                cart.vendor_id = product.vendor_id;
+                await cart.save();
+            }
             cartProduct.cart_id = cart.id;
             cartProduct.total = product.selling_price;
             await cartProduct.save();
@@ -73,7 +77,32 @@ export class CartService {
 
     async sumCart(cartId: string): Promise<Cart | any> {
         let total = 0;
-        const cart = await Cart.findOne({where: {id: cartId}, relations: {cart_products: {product: true}}})
+        const cart = await Cart.findOne({
+            where: {id: cartId}, relations: {cart_products: {product: {vendor: true}}}, select: {
+                cart_products: {
+                    id: true,
+                    product_id: true,
+                    product_quantity: true,
+                    product_discount: true,
+                    cart_id: true,
+                    total: true,
+                    product: {
+                        name: true,
+                        image_url: true,
+                        quantity: true,
+                        selling_price: true,
+                        cost_price: true,
+                        vendor_id: true,
+                        id: true,
+                        discount: true,
+                        vendor: {
+                            id: true,
+                            name: true,
+                        }
+                    }
+                }
+            }
+        })
         if (!cart) returnErrorResponse('Could not find cart')
         for (const cartProduct of cart.cart_products) {
             const product = cartProduct.product;
@@ -97,7 +126,37 @@ export class CartService {
     }
 
     async getCart(userId: string, loadProducts = false): Promise<Cart> {
-        let cart = await Cart.findOne({relations: {cart_products: loadProducts}, where: {user_id: userId}})
+        let vendorSelect = {};
+        vendorSelect = {id:true, location:true}
+        let cart = await Cart.findOne({
+            relations: {vendor:true, cart_products: {product: {vendor: true}}},
+            where: {user_id: userId},
+            select: {
+                vendor:vendorSelect,
+                cart_products: {
+                    id: true,
+                    product_id: true,
+                    product_quantity: true,
+                    product_discount: true,
+                    cart_id: true,
+                    total: true,
+                    product: {
+                        name: true,
+                        image_url: true,
+                        quantity: true,
+                        selling_price: true,
+                        cost_price: true,
+                        vendor_id: true,
+                        id: true,
+                        discount: true,
+                        vendor: {
+                            id: true,
+                            name: true,
+                        }
+                    }
+                }
+            }
+        })
         if (!cart) {
             cart = await this.createCart(userId)
         }

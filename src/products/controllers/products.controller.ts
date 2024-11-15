@@ -8,6 +8,7 @@ import {AuthUser} from "../../decorators/user.decorator";
 import {User} from "../../users/entities/user.entity";
 import {GetPagination, PaginationDto} from "../../decorators/pagination-decorator";
 import {RateProductDto} from "../../ratings/dto/create-rating.dto";
+import {successResponse} from "../../utils/response";
 
 @Controller('products')
 export class ProductsController {
@@ -20,8 +21,8 @@ export class ProductsController {
     // }
 
     @Get()
-    products(@Query() searchProductsDto: SearchProductsDto, @GetPagination() pagination: PaginationDto) {
-        return this.productsService.products(searchProductsDto, pagination);
+    async products(@Query() searchProductsDto: SearchProductsDto, @GetPagination() pagination: PaginationDto) {
+        return successResponse(await this.productsService.products(searchProductsDto, pagination))
     }
 
     @Get(':product_slug')

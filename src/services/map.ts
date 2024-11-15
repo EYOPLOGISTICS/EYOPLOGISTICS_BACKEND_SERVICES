@@ -8,8 +8,8 @@ export const useGoogleMapServices = () => {
 
 
     const calculateDeliveryFee = async (origin = "33.74829562470758,-84.22327453508204", destination = "33.7631057,-84.21027") => {
-        const feePerKm = 13;
-        const feePerMin = 2;
+        const feePerKm = 80;
+        const feePerMin = 23;
         try {
             const response = await client.distancematrix({
                 params: {
@@ -25,7 +25,7 @@ export const useGoogleMapServices = () => {
             const km_fee_total = feePerKm * parseFloat(km.toFixed(1));
             const time = Math.round(response.data.rows[0].elements[0].duration.value / 60);
             const time_fee_total = feePerMin * time;
-            const deliveryFee = roundPosition(Math.round(km_fee_total), 2);
+            const deliveryFee = roundPosition(Math.round(km_fee_total + time_fee_total), 2);
             console.log(km_fee_total)
             console.log(time_fee_total)
             return {

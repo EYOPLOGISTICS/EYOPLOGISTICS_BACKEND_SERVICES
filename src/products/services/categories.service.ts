@@ -48,7 +48,7 @@ export class CategoryService {
     }
 
     async vendorCategories() {
-        const vendorCategories = await VendorCategory.find({order: {name: 'ASC'}});
+        const vendorCategories = await VendorCategory.find({order: {name: 'ASC',}});
         return successResponse({vendor_categories: vendorCategories})
     }
 

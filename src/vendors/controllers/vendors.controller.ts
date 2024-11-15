@@ -17,7 +17,7 @@ export class VendorsController {
     constructor(private readonly vendorsService: VendorsService, private bankAccountService: BankAccountsService) {
     }
 
-    @Get('/category-collections')
+    @Get('/categories/collections')
     async getVendorCategories(){
         const categories = await VendorCategory.find();
         return successResponse({categories})
