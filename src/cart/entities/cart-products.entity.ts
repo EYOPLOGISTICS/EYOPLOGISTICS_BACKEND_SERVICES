@@ -28,7 +28,7 @@ export class CartProduct extends EyopBaseEntity{
     @JoinColumn({name:'product_id',})
     product:Product
 
-    @ManyToOne(() => Cart, (cart) => cart.cart_products)
+    @ManyToOne(() => Cart, (cart) => cart.cart_products, {onDelete:'CASCADE'})
     @JoinColumn({name:'cart_id'})
     cart:Cart
 }

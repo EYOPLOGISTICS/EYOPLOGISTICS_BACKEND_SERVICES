@@ -54,8 +54,6 @@ export class Product extends EyopBaseEntity {
     @OneToMany(() => Image, (image) => image.product)
     images: Image[]
 
-    @OneToMany(() => Rating, (ratings) => ratings.product)
-    ratings: Rating[]
 
     @ManyToOne(() => Vendor, (vendor) => vendor, {
         onDelete:'CASCADE'

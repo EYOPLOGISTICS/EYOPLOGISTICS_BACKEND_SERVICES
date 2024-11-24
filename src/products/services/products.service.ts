@@ -11,8 +11,6 @@ import {Vendor} from "../../vendors/entities/vendor.entity";
 import {User} from "../../users/entities/user.entity";
 import {PaginationDto} from "../../decorators/pagination-decorator";
 import {RatingsService} from "../../ratings/ratings.service";
-import {Rating} from "../../ratings/entities/rating.entity";
-import {RateProductDto} from "../../ratings/dto/create-rating.dto";
 
 @Injectable()
 export class ProductsService {
@@ -71,40 +69,30 @@ export class ProductsService {
         if (category) conditions['category_id'] = category;
         if (sub_category) conditions['sub_category_id'] = sub_category;
         if (vendor) conditions['vendor_id'] = vendor;
-        let select = {}
-        select = {vendor: {verified: true, name: true, logo: true, id:true, location:true}}
         const [products, count] = await Product.findAndCount({
-            relations: {vendor: true, images: true},
-            select,
+            relations: {images: true},
             where: conditions,
             skip: pagination.offset,
             take: pagination.limit
         })
-        for(const product of products){
-            product['ratings'] = await Rating.find({where: {product_id: product.id}, take: 1, order: {created_at: 'DESC'}, relations:{user:true}, select:{user:{full_name:true, profile_picture:true, id:true}}})
-        }
+
         return {products, total_rows: count}
     }
 
     async viewProduct(data: string): Promise<any> {
         const product = await Product.findOne({
             where: {slug: data},
-            relations: {vendor: true, images: true},
-            select: {vendor: {verified: true, name: true, logo: true}}
+            relations: {images: true},
         })
         if (!product) returnErrorResponse('product does not exist')
-        product['ratings'] = await Rating.find({where: {product_id: product.id}, take: 1, order: {created_at: 'DESC'}})
+
         return successResponse({product})
     }
 
-    async rateProduct(productId: string, rateProductDto: RateProductDto, user: User) {
-        const {star, review} = rateProductDto;
-        return await this.ratingService.create(user.id, productId, star, review);
-    }
 
-    async update(id: string, updateProductDto: UpdateProductDto) {
-
-    }
+    // async update(id: string, updateProductDto: UpdateProductDto) {
+    //
+    // }
 
     async remove(productId: string, vendor: string): Promise<Product | any> {
         const product = await Product.findOne({where: {id: productId}})

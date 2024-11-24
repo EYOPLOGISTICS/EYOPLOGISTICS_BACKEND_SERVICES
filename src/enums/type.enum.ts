@@ -11,10 +11,12 @@ export enum ORDER_TIMELINE {
 }
 
 export enum ORDER_STATUS {
+  ALL = "all",
   PENDING = "pending",
   ONGOING = "ongoing",
   COMPLETED = "completed",
-  CANCELLED = "cancelled"
+  CANCELLED = "cancelled",
+  FAILED = "failed"
 
 }
 

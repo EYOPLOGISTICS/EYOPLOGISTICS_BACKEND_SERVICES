@@ -132,8 +132,8 @@ export const generateRandomNum = () => {
 }
 
 export const generateTrackingCode = () => {
-    const min = 100000;
-    const max = 999900;
+    const min = 10000000;
+    const max = 99990000;
     return Math.floor(Math
         .random() * (max - min + 1)) + min;
 }

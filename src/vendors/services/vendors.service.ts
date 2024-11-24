@@ -12,6 +12,7 @@ import {PaginationDto} from "../../decorators/pagination-decorator";
 import {ProductsService} from "../../products/services/products.service";
 import {Product} from "../../products/entities/product.entity";
 import {NotificationsService} from "../../notifications/notifications.service";
+import {Rating} from "../../ratings/entities/rating.entity";
 
 @Injectable()
 export class VendorsService {
@@ -86,7 +87,9 @@ export class VendorsService {
             verified: true,
             phone_number: true,
             city: true,
-            country: true
+            country: true,
+            total_rating:true,
+            rating_count:true
         }
 
         const [vendors, count] = await Vendor.findAndCount({
@@ -95,6 +98,9 @@ export class VendorsService {
             skip: pagination.offset,
             select
         })
+        for (const vendor of vendors){
+          vendor['ratings'] =  await Rating.find({where: {vendor_id: vendor.id}, take: 1, order: {created_at: 'DESC'}, relations:{user:true}, select:{user:{full_name:true, profile_picture:true, id:true}}})
+        }
         return successResponse({vendors, total_rows:count})
     }
 

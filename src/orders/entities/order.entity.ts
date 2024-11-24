@@ -5,10 +5,14 @@ import {MapDto} from "../../vendors/dto/create-vendor.dto";
 import {OrderProduct} from "./order-products.entity";
 import {OrderTimeline} from "./order_timeline.entity";
 import {Vendor} from "../../vendors/entities/vendor.entity";
+import {Rating} from "../../ratings/entities/rating.entity";
 @Entity('orders')
 export class Order extends EyopBaseEntity{
     @Column({nullable:false})
     user_id:string
+
+    @Column({nullable:true})
+    tracking_id:string
 
     @Column({nullable:false})
     cart_id:string
@@ -70,6 +74,9 @@ export class Order extends EyopBaseEntity{
     @Column({default:false})
     is_active:boolean
 
+    @Column({nullable:true})
+    rating_id:string
+
     @ManyToOne(() => Vendor, (vendor) => vendor)
     @JoinColumn({name:'vendor_id'})
     vendor:Vendor
@@ -79,6 +86,8 @@ export class Order extends EyopBaseEntity{
 
     @OneToMany(() => OrderTimeline, (orderTimelines) => orderTimelines.order)
     timelines:OrderTimeline[]
-
+    @ManyToOne(() => Rating, (rating) => rating)
+    @JoinColumn({name:'rating_id'})
+    rating:Rating
 
 }

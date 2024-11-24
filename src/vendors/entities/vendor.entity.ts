@@ -21,6 +21,12 @@ export class Vendor extends EyopBaseEntity {
     @Column({nullable: false, default:0})
     balance: number
 
+    @Column({nullable: false, default:0})
+    rating_count: number
+
+    @Column({nullable: false, default:0, type:'float'})
+    total_rating: string
+
     @Column({nullable: false})
     phone_number: string
 

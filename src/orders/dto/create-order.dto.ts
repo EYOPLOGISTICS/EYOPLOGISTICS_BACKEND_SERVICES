@@ -18,7 +18,7 @@ export class CreateOrderDto {
 
     @IsNotEmpty()
     @ValidateNested()
-    shipping_location:MapDto
+    destination:MapDto
 
     @IsNotEmpty()
     shipping_address:string

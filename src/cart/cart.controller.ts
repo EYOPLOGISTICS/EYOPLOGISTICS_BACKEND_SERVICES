@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, Query} from '@nestjs/common';
 import {CartService} from './cart.service';
 import {AuthUser} from "../decorators/user.decorator";
 import {User} from "../users/entities/user.entity";
@@ -17,6 +17,16 @@ export class CartController {
     @Post('/:product_id')
     create(@AuthUser() user: User, @Param('product_id') productId: string) {
         return this.cartService.addToCart(productId, user);
+    }
+
+    @Post('/wishlist/:vendor_id')
+    addToWishlist(@AuthUser() user: User, @Param('vendor_id') vendorId: string, @Query('action') action:string) {
+        return this.cartService.addToWishlist(vendorId, user, action);
+    }
+
+    @Get('/wishlist')
+    wishlist(@AuthUser() user:User){
+        return this.cartService.wishlist(user)
     }
 
     @Patch('/increment/:product_id')

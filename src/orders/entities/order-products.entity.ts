@@ -15,6 +15,9 @@ export class OrderProduct extends EyopBaseEntity{
     order_id:string
 
     @Column({nullable:false})
+    product_image:string
+
+    @Column({nullable:false})
     product_quantity:number
 
     @Column({nullable:false, default:0})
@@ -29,7 +32,7 @@ export class OrderProduct extends EyopBaseEntity{
     @Column({nullable:false})
     total:number
 
-    @OneToOne(() => Order, (order) => order, {onDelete:'CASCADE'})
+    @ManyToOne(() => Order, (order) => order, {onDelete:'CASCADE'})
     @JoinColumn({name:'order_id',})
     order:Order
 

@@ -26,8 +26,6 @@ export const useGoogleMapServices = () => {
             const time = Math.round(response.data.rows[0].elements[0].duration.value / 60);
             const time_fee_total = feePerMin * time;
             const deliveryFee = roundPosition(Math.round(km_fee_total + time_fee_total), 2);
-            console.log(km_fee_total)
-            console.log(time_fee_total)
             return {
                 km: km_int,
                 time: time,

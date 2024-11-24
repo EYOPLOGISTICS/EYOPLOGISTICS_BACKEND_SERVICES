@@ -8,10 +8,13 @@ import {successResponse} from "../utils/response";
 import {ORDER_STATUS} from "../enums/type.enum";
 import {GetPagination, PaginationDto} from "../decorators/pagination-decorator";
 import {GetVendorId} from "../decorators/vendor.decorator";
+import {UpdateRatingDto} from "../ratings/dto/update-rating.dto";
+import {RateVendorDto} from "../ratings/dto/create-rating.dto";
+import {RatingsService} from "../ratings/ratings.service";
 
 @Controller('orders')
 export class OrdersController {
-    constructor(private readonly ordersService: OrdersService) {
+    constructor(private readonly ordersService: OrdersService, private ratingService: RatingsService) {
     }
 
     @Post('/checkout')
@@ -23,6 +26,21 @@ export class OrdersController {
     @Post()
     create(@Body() createOrderDto: CreateOrderDto, @AuthUser() user: User) {
         return this.ordersService.create(createOrderDto, user);
+    }
+
+    @Post('/ratings/:order_id')
+    rateOrder(@AuthUser() user:User, @Body() ratingDto:RateVendorDto, @Param('order_id') orderId: string){
+        return this.ratingService.create(user.id, orderId, ratingDto.star, ratingDto.review)
+    }
+
+    @Patch('/cancel/:order_id')
+    cancelOrder(@Param('order_id') orderId:string, @AuthUser() user: User) {
+        return this.ordersService.cancelOrder(orderId, user);
+    }
+
+    @Patch('/complete/:order_id')
+    completeOrder(@Param('order_id') orderId:string, @AuthUser() user: User) {
+        return this.ordersService.completeOrder(orderId, user);
     }
 
     @Get('/customer')

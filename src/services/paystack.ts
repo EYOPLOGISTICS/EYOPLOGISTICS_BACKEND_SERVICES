@@ -82,6 +82,7 @@ const usePaystackService = () => {
 
 
     const initializeTransaction = async (email: string, amount: number, metadata: any, payment_channels?: Array<string>) => {
+        console.log(amount)
         try {
             const options = {
                 headers: header()
@@ -167,6 +168,7 @@ const usePaystackService = () => {
             if (response.data.status === true) return await verifyTransaction(response.data.data.reference, user);
             return false;
         } catch (e) {
+            console.log(e)
             return false;
         }
     };

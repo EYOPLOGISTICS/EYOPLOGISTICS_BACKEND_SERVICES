@@ -7,7 +7,6 @@ import {Vendor} from "../../vendors/entities/vendor.entity";
 import {AuthUser} from "../../decorators/user.decorator";
 import {User} from "../../users/entities/user.entity";
 import {GetPagination, PaginationDto} from "../../decorators/pagination-decorator";
-import {RateProductDto} from "../../ratings/dto/create-rating.dto";
 import {successResponse} from "../../utils/response";
 
 @Controller('products')
@@ -30,14 +29,10 @@ export class ProductsController {
         return this.productsService.viewProduct(slug);
     }
 
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-        return this.productsService.update(id, updateProductDto);
-    }
+    // @Patch(':id')
+    // update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    //     return this.productsService.update(id, updateProductDto);
+    // }
 
-    @Post('/ratings/:product_id')
-    rateProduct(@Param('product_id') productId: string, @AuthUser() user: User, @Body() rateProductDto: RateProductDto) {
-        return this.productsService.rateProduct(productId, rateProductDto, user)
-    }
 
 }

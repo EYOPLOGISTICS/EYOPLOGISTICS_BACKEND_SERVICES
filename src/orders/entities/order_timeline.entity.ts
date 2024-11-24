@@ -12,7 +12,7 @@ export class OrderTimeline extends EyopBaseEntity{
     @Column({nullable:true})
     timeline_id:string
 
-    @Column({nullable:false, default:true})
+    @Column({nullable:false, default:false})
     status:boolean
 
     @ManyToOne(() => Order, (order) => order, {onDelete:'CASCADE'})

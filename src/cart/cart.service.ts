@@ -4,6 +4,7 @@ import {returnErrorResponse, successResponse} from "../utils/response";
 import {User} from "../users/entities/user.entity";
 import {Cart} from "./entities/cart.entity";
 import {CartProduct} from "./entities/cart-products.entity";
+import {Wishlist} from "./entities/wishlist.entity";
 
 @Injectable()
 export class CartService {
@@ -110,6 +111,8 @@ export class CartService {
             const discountedAmount = product.discount ? (totalProductAmount / 100) * product.discount : totalProductAmount;
             totalProductAmount = product.discount ? totalProductAmount - discountedAmount : totalProductAmount;
             total += totalProductAmount;
+            cartProduct.total = totalProductAmount;
+            await cartProduct.save();
         }
         cart.total = total;
         await cart.save();
@@ -163,4 +166,22 @@ export class CartService {
         return cart
     }
 
+    async addToWishlist(vendorId:string, user:User, action:string){
+        console.log(action)
+        let wishlist = await Wishlist.findOne({where:{user_id:user.id, vendor_id:vendorId}})
+        if(wishlist && action === 'remove'){
+            await wishlist.remove();
+        } else if(!wishlist && action === 'add'){
+            wishlist = new Wishlist();
+            wishlist.vendor_id = vendorId;
+            wishlist.user_id = user.id;
+            await wishlist.save();
+        }
+        return successResponse('Done')
+    }
+
+    async wishlist(user:User){
+        const wishlist = await Wishlist.find({where:{user_id:user.id}, relations:{vendor:true}, select:{vendor:{id:true, name:true, verified:true, logo:true}}})
+        return successResponse({wishlist})
+    }
 }
