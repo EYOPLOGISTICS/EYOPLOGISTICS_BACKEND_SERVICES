@@ -40,7 +40,7 @@ export class CreateProductDto {
 export class SearchProductsDto extends PaginationDto{
     category?:string
     sub_category?:string
-    product_name:string
+    filter:string
     vendor?:string
     start_date?:string
     end_date?:string

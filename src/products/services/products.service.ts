@@ -11,6 +11,7 @@ import {Vendor} from "../../vendors/entities/vendor.entity";
 import {User} from "../../users/entities/user.entity";
 import {PaginationDto} from "../../decorators/pagination-decorator";
 import {RatingsService} from "../../ratings/ratings.service";
+import {Like} from "typeorm";
 
 @Injectable()
 export class ProductsService {
@@ -63,15 +64,33 @@ export class ProductsService {
     }
 
     async products(searchProductsDto: SearchProductsDto, pagination: PaginationDto): Promise<{ products: Product[], total_rows: number }> {
-        const {product_name, category, sub_category, vendor} = searchProductsDto;
+        const {filter, category, sub_category, vendor} = searchProductsDto;
+        const where = []
         const conditions = {};
-        if (product_name) conditions['name'] = product_name;
+        const condition2 = {};
+        const condition3 = {};
+
         if (category) conditions['category_id'] = category;
         if (sub_category) conditions['sub_category_id'] = sub_category;
         if (vendor) conditions['vendor_id'] = vendor;
+        where.push(conditions)
+        if (filter) {
+            conditions['name'] = Like(`%${filter}%`);
+            if (category) condition2['category_id'] = category;
+            if (sub_category) condition2['sub_category_id'] = sub_category;
+            if (vendor) condition2['vendor_id'] = vendor;
+            condition2['sub_category_name'] = Like(`%${filter}%`)
+            condition3['category_name'] = Like(`%${filter}%`)
+            if (category) condition3['category_id'] = category;
+            if (sub_category) condition3['sub_category_id'] = sub_category;
+            if (vendor) condition3['vendor_id'] = vendor;
+            where.push(condition2)
+            where.push(condition3)
+        }
+
         const [products, count] = await Product.findAndCount({
             relations: {images: true},
-            where: conditions,
+            where: where,
             skip: pagination.offset,
             take: pagination.limit
         })

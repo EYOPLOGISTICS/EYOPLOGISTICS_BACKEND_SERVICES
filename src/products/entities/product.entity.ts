@@ -10,6 +10,12 @@ export class Product extends EyopBaseEntity {
     name: string
 
     @Column({nullable:false})
+    category_name: string
+
+    @Column({nullable:false})
+    sub_category_name: string
+
+    @Column({nullable:false})
     slug: string
 
     @Column({nullable:false})
