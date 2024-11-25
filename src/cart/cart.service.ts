@@ -78,6 +78,7 @@ export class CartService {
 
     async sumCart(cartId: string): Promise<Cart | any> {
         let total = 0;
+        let discount = 0;
         const cart = await Cart.findOne({
             where: {id: cartId}, relations: {cart_products: {product: {vendor: true}}}, select: {
                 cart_products: {
@@ -114,9 +115,10 @@ export class CartService {
             cartProduct.total = totalProductAmount;
             cartProduct.discountedAmount = discountedAmount;
             cartProduct.product_discount = product.discount.toString();
-            cart.total_discount += product.discount ?  discountedAmount : 0;
+            discount += product.discount ?  discountedAmount : 0;
             await cartProduct.save();
         }
+        cart.total_discount = discount;
         cart.total = total;
         await cart.save();
         return cart;
