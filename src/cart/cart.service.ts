@@ -115,7 +115,7 @@ export class CartService {
             cartProduct.total = totalProductAmount;
             cartProduct.discountedAmount = discountedAmount;
             cartProduct.product_discount = product.discount.toString();
-            discount += product.discount ?  discountedAmount : 0;
+            discount +=   discountedAmount;
             await cartProduct.save();
         }
         cart.total_discount = discount;
