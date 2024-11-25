@@ -67,6 +67,7 @@ export class OrdersService {
         order.order_total = total;
         order.km = km;
         order.duration = duration;
+        order.discount = cart.total_discount;
         await order.save();
 
         await OrderProduct.delete({order_id: order.id})
@@ -78,7 +79,7 @@ export class OrdersService {
             orderProduct.product_cost_price = cartProduct.product.cost_price;
             orderProduct.product_selling_price = cartProduct.product.selling_price;
             orderProduct.product_quantity = cartProduct.product_quantity;
-            orderProduct.product_discount = cartProduct.product.discount;
+            orderProduct.product_discount = parseInt(cartProduct.product_discount);
             orderProduct.product_id = cartProduct.product_id;
             orderProduct.product_image = cartProduct.product.image_url;
             orderProduct.total = cartProduct.total;

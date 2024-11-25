@@ -14,6 +14,9 @@ export class Cart extends EyopBaseEntity{
     @Column({nullable:true, name:'vendor_id'})
     vendor_id:string
 
+    @Column({nullable:true})
+    total_discount:number
+
     @OneToMany(() => CartProduct, (products) => products.cart)
     cart_products:CartProduct[]
 

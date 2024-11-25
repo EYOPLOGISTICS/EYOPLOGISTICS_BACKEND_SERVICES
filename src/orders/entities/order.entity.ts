@@ -61,6 +61,9 @@ export class Order extends EyopBaseEntity{
     km:number
 
     @Column({nullable:true})
+    discount:number
+
+    @Column({nullable:true})
     duration:string
 
     @Column({nullable:false})
