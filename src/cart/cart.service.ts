@@ -113,9 +113,9 @@ export class CartService {
             totalProductAmount = product.discount ? totalProductAmount - discountedAmount : totalProductAmount;
             total += totalProductAmount;
             cartProduct.total = totalProductAmount;
-            cartProduct.discountedAmount = discountedAmount;
+            cartProduct.discountedAmount = product.discount ? discountedAmount : 0;
             cartProduct.product_discount = product.discount.toString();
-            discount +=   discountedAmount;
+            discount += product.discount ? discountedAmount : 0;
             await cartProduct.save();
         }
         cart.total_discount = discount;
@@ -135,12 +135,12 @@ export class CartService {
 
     async getCart(userId: string, loadProducts = false): Promise<Cart> {
         let vendorSelect = {};
-        vendorSelect = {id:true, location:true}
+        vendorSelect = {id: true, location: true}
         let cart = await Cart.findOne({
-            relations: {vendor:true, cart_products: {product: {vendor: true}}},
+            relations: {vendor: true, cart_products: {product: {vendor: true}}},
             where: {user_id: userId},
             select: {
-                vendor:vendorSelect,
+                vendor: vendorSelect,
                 cart_products: {
                     id: true,
                     product_id: true,
@@ -171,12 +171,12 @@ export class CartService {
         return cart
     }
 
-    async addToWishlist(vendorId:string, user:User, action:string){
+    async addToWishlist(vendorId: string, user: User, action: string) {
         console.log(action)
-        let wishlist = await Wishlist.findOne({where:{user_id:user.id, vendor_id:vendorId}})
-        if(wishlist && action === 'remove'){
+        let wishlist = await Wishlist.findOne({where: {user_id: user.id, vendor_id: vendorId}})
+        if (wishlist && action === 'remove') {
             await wishlist.remove();
-        } else if(!wishlist && action === 'add'){
+        } else if (!wishlist && action === 'add') {
             wishlist = new Wishlist();
             wishlist.vendor_id = vendorId;
             wishlist.user_id = user.id;
@@ -185,8 +185,12 @@ export class CartService {
         return successResponse('Done')
     }
 
-    async wishlist(user:User){
-        const wishlist = await Wishlist.find({where:{user_id:user.id}, relations:{vendor:true}, select:{vendor:{id:true, name:true, verified:true, logo:true}}})
+    async wishlist(user: User) {
+        const wishlist = await Wishlist.find({
+            where: {user_id: user.id},
+            relations: {vendor: true},
+            select: {vendor: {id: true, name: true, verified: true, logo: true}}
+        })
         return successResponse({wishlist})
     }
 }
