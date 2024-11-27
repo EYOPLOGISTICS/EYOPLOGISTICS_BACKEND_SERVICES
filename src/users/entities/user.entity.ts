@@ -4,6 +4,7 @@ import {Role} from "../../enums/role.enum";
 import {CURRENCIES, formatDateTime, isNull, SUPPORTED_COUNTRIES} from "../../utils";
 import {PAYMENT_TYPE} from "../../enums/type.enum";
 import {Exclude} from "class-transformer";
+import {MapDto} from "../../vendors/dto/create-vendor.dto";
 
 @Entity("users")
 export class User extends EyopBaseEntity {
@@ -68,6 +69,19 @@ export class User extends EyopBaseEntity {
 
     @Column({nullable: false, default: false})
     verified: boolean;
+
+    @Column({
+        nullable: true, type: "json", transformer: {
+            to(value) {
+                return JSON.stringify(value);
+            },
+            from(value) {
+                // Do nothing
+                return JSON.parse(JSON.stringify(value));
+            }
+        }
+    })
+    location: MapDto;
 
 
     // @AfterLoad()
