@@ -13,7 +13,7 @@ import {
     UseInterceptors
 } from "@nestjs/common";
 import {UsersService} from "./users.service";
-import {UpdatePaymentType, UpdateUserDto} from "./dto/update-user.dto";
+import {UpdatePaymentType, UpdateUserDto, UpdateUserLocation} from "./dto/update-user.dto";
 import {successResponse} from "../utils/response";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {ApiConsumes, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
@@ -64,6 +64,15 @@ export class UsersController {
             message: "user updated successfully"
         });
     }
+
+    @Patch('/update-location')
+    async updateLocation(@AuthUser() user: User, @Body() updateUserLocation: UpdateUserLocation) {
+       user.location = updateUserLocation.location;
+       user.address = updateUserLocation.address;
+        await user.save();
+        return successResponse('location updated successfully')
+    }
+
 
     @Patch('/payment-method')
     async updatePaymentMethod(@AuthUser() user: User, @Body() updatePaymentTypeDto: UpdatePaymentType) {
