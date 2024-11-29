@@ -33,7 +33,7 @@ export class VendorsController {
         return this.vendorsService.vendorsCustomer(vendorSearchDto,viewer, pagination);
     }
 
-    @Get()
+    @Get('/stores')
     vendorsOwner(@AuthUser() viewer: User) {
         return this.vendorsService.vendorsOwner(viewer);
     }
