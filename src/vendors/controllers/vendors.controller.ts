@@ -38,6 +38,11 @@ export class VendorsController {
         return this.vendorsService.vendorsOwner(viewer);
     }
 
+    @Get('/auth')
+    authLoggedInVendor(@GetVendor() vendor:Vendor) {
+        return successResponse({vendor});
+    }
+
     @Post('/products')
     createProduct(@AuthUser() creator: User, @Body() createProductDto: CreateProductDto, @GetVendorId() vendor: string) {
         return this.vendorsService.createProduct(createProductDto, vendor, creator);

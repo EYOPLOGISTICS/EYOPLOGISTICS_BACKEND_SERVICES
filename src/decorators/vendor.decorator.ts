@@ -6,7 +6,7 @@ import {Vendor} from "../vendors/entities/vendor.entity";
 export const GetVendor = createParamDecorator(
     async (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();
-        const vendorId = request.headers['v-id']
+        const vendorId = request.headers['logged_in_vendor']
         if (vendorId) returnErrorResponse('Vendor is required')
         const vendor = await Vendor.findOne({where: {id: vendorId}});
         if (!vendor) returnErrorResponse("Invalid vendor");
