@@ -58,6 +58,11 @@ export class VendorsController {
         return this.vendorsService.viewProduct(productId, vendorId);
     }
 
+    @Get('/vendor/dashboard')
+    dashboard(@GetVendorId() vendorId: string) {
+        return this.vendorsService.dashboard(vendorId);
+    }
+
     @Delete('/products/:product_id')
     removeProduct(@Param('product_id') productId: string, @AuthUser() remover: User, @GetVendorId() vendor: string) {
         return this.vendorsService.removeProduct(productId, vendor, remover);

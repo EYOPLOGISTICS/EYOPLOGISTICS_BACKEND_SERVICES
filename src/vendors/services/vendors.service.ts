@@ -5,7 +5,7 @@ import {useGoogleMapServices} from "../../services/map";
 import {Vendor} from "../entities/vendor.entity";
 import {returnErrorResponse, successResponse} from "../../utils/response";
 import {User} from "../../users/entities/user.entity";
-import {DataSource, EntityManager, Not} from "typeorm";
+import {Not} from "typeorm";
 import {VendorCategory} from "../entities/category.entity";
 import {CreateProductDto, SearchProductsDto} from "../../products/dto/create-product.dto";
 import {PaginationDto} from "../../decorators/pagination-decorator";
@@ -13,6 +13,8 @@ import {ProductsService} from "../../products/services/products.service";
 import {Product} from "../../products/entities/product.entity";
 import {NotificationsService} from "../../notifications/notifications.service";
 import {Rating} from "../../ratings/entities/rating.entity";
+import {Order} from "../../orders/entities/order.entity";
+import {ORDER_STATUS} from "../../enums/type.enum";
 
 @Injectable()
 export class VendorsService {
@@ -121,6 +123,13 @@ export class VendorsService {
         const product = await Product.findOne({where: {id: productId, vendor_id: vendorId}})
         if (!product) returnErrorResponse('product does not exist')
         return successResponse({product})
+    }
+
+    async dashboard(vendorId:string){
+        const totalSales = await Order.sum('order_total', {status:ORDER_STATUS.COMPLETED, vendor_id:vendorId})
+        const totalProducts = await Product.count({where:{vendor_id:vendorId}})
+        const pendingOrders = await Order.count({where:{vendor_id:vendorId, status:ORDER_STATUS.ONGOING}})
+        return successResponse({total_sales:totalSales, total_product:totalProducts, pending_orders:pendingOrders})
     }
 
     async removeProduct(productId: string, vendor: string, remover: User) {
