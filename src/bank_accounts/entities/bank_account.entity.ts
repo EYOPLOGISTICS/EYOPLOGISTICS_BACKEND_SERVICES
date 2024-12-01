@@ -1,6 +1,7 @@
 import {EyopBaseEntity} from "../../abstract/osr-base-entity";
 import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne} from "typeorm";
 import { CURRENCIES } from "../../enums/type.enum";
+import {Vendor} from "../../vendors/entities/vendor.entity";
 
 @Entity("bank_accounts")
 export class BankAccount extends EyopBaseEntity {
@@ -41,7 +42,9 @@ export class BankAccount extends EyopBaseEntity {
     @Column({ nullable: true, name:'user_id' })
     user_id: string;
 
-
+    @OneToOne(() => Vendor, (vendor) => vendor, {onDelete:'CASCADE'})
+    @JoinColumn({name:'vendor_id'})
+    vendor:Vendor
 
 
     // @Column({ nullable: false, default:false })
