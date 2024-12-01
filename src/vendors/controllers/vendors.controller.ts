@@ -75,7 +75,7 @@ export class VendorsController {
     }
 
     @Post('/verification/cac')
-    submitCac(@GetVendor() vendor: Vendor, @AuthUser() takenBy: User, cacDto: CACDto) {
+    submitCac(@GetVendor() vendor: Vendor, @AuthUser() takenBy: User, @Body() cacDto: CACDto) {
         return this.vendorsService.submitCaC(vendor, cacDto, takenBy)
     }
 
