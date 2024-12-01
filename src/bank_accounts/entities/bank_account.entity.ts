@@ -42,6 +42,8 @@ export class BankAccount extends EyopBaseEntity {
     user_id: string;
 
 
+
+
     // @Column({ nullable: false, default:false })
     // default: boolean;
 
