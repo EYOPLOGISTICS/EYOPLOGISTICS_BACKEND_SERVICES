@@ -7,6 +7,8 @@ import {successResponse} from "../utils/response";
 import usePaystackService from "../services/paystack";
 import {AuthUser} from "../decorators/user.decorator";
 import {User} from "../users/entities/user.entity";
+import {GetVendor} from "../decorators/vendor.decorator";
+import {Vendor} from "../vendors/entities/vendor.entity";
 
 const {verifyBankAccount, getNigerianBanks} = usePaystackService;
 
@@ -28,8 +30,8 @@ export class BankAccountsController {
     }
 
     @Post()
-    create(@Body() createBankAccountDto: CreateBankAccountDto, @AuthUser() user: User) {
-        return this.bankAccountsService.create(user, createBankAccountDto);
+    create(@GetVendor() vendor:Vendor, @Body() createBankAccountDto: CreateBankAccountDto, @AuthUser() user: User) {
+        return this.bankAccountsService.create(user, createBankAccountDto, vendor);
     }
 
 

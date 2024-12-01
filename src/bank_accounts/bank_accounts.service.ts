@@ -5,12 +5,13 @@ import usePaystackService from "../services/paystack";
 import {BankAccount} from "./entities/bank_account.entity";
 import {User} from "../users/entities/user.entity";
 import {returnErrorResponse, successResponse} from "../utils/response";
+import {Vendor} from "../vendors/entities/vendor.entity";
 
 const {verifyBankAccount, createTransferRecipient} = usePaystackService;
 
 @Injectable()
 export class BankAccountsService {
-    async create(user: User, createBankAccountDto: CreateBankAccountDto) {
+    async create(user: User, createBankAccountDto: CreateBankAccountDto, vendor:Vendor) {
         const {account_number, bank_code, bank_name, vendor_id} = createBankAccountDto;
         const verified_bank_details = await verifyBankAccount(account_number, bank_code);
         const paystack_recipient = await createTransferRecipient(account_number, verified_bank_details.account_name, bank_code);
@@ -23,14 +24,12 @@ export class BankAccountsService {
         bank.currency = paystack_recipient.currency;
         bank.email = paystack_recipient.email;
         bank.recipient_id = paystack_recipient.id;
-        if (vendor_id) {
-            bank.vendor_id = vendor_id;
-        } else {
-            bank.user_id = user.id;
-        }
+        bank.user_id = vendor.id;
         bank.account_number = paystack_recipient.details.account_number;
         bank.bank_id = verified_bank_details.bank_id;
         await bank.save();
+        vendor.has_bank_account = true;
+        await vendor.save()
         return successResponse('bank details created successfully')
     }
 
