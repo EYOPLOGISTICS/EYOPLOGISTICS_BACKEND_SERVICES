@@ -23,17 +23,17 @@ export class ProductsService {
             name,
             description,
             selling_price,
-            sub_category_slug,
+            sub_category_id,
             vat,
             cost_price,
             discount,
-            category_slug,
+            category_id,
             quantity,
-            images
+            image_url
         } = createProductDto;
-        const category = await Category.findOneBy({slug: category_slug})
+        const category = await Category.findOneBy({id: category_id})
         if (!category) returnErrorResponse('Category does not exist')
-        const subCategory = await SubCategory.findOne({where: {slug: sub_category_slug}})
+        const subCategory = await SubCategory.findOne({where: {slug: sub_category_id}})
         if (!subCategory) returnErrorResponse('Sub Category does not exist')
         const slug = useSlugify(name)
         if (await Product.findOne({where: {slug}})) returnErrorResponse('Product name already exists')
@@ -48,17 +48,15 @@ export class ProductsService {
         product.category_id = category.id;
         product.sub_category_id = subCategory.id;
         product.quantity = quantity;
-        product.image_count = images.length;
+        product.image_count = 1;
         product.discount = discount ?? 0;
         await product.save();
-        for (const url of images) {
-            const newImage = new Image();
-            newImage.product_id = product.id;
-            newImage.url = url;
-            await newImage.save()
-        }
+        const newImage = new Image();
+        newImage.product_id = product.id;
+        newImage.url = image_url;
+        await newImage.save()
 
-        product.image_url = images[0];
+        product.image_url = image_url;
         await product.save();
         return product;
     }

@@ -3,10 +3,10 @@ import {PaginationDto} from "../../decorators/pagination-decorator";
 
 export class CreateProductDto {
     @IsNotEmpty()
-    category_slug:string
+    category_id:string
 
     @IsNotEmpty()
-    sub_category_slug:string
+    sub_category_id:string
 
     // @IsNotEmpty({message:'Vendor is required'})
     // vendor_id:string
@@ -21,16 +21,19 @@ export class CreateProductDto {
     cost_price:number
 
     @IsNotEmpty()
+    image_url:string
+
+    @IsNotEmpty()
     quantity:number
 
     @IsNotEmpty()
     selling_price:number
 
-    @IsNotEmpty()
-    @IsArray()
-    @ArrayNotEmpty()
-    @ArrayMaxSize(3)
-    images:[string]
+    // @IsNotEmpty()
+    // @IsArray()
+    // @ArrayNotEmpty()
+    // @ArrayMaxSize(3)
+    // images:[string]
 
     discount:number
 
