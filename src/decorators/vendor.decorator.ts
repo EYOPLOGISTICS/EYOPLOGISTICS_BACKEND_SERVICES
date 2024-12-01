@@ -17,7 +17,7 @@ export const GetVendor = createParamDecorator(
 export const GetVendorId = createParamDecorator(
     async (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();
-        const vendorId = request.headers['v-id']
+        const vendorId = request.headers['logged-in-vendor']
         if (!vendorId) returnErrorResponse('Vendor is required')
         return vendorId;
     }
