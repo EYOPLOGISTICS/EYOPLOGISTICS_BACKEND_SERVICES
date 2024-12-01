@@ -43,6 +43,11 @@ export class OrdersController {
         return this.ordersService.completeOrder(orderId, user);
     }
 
+    @Patch('/timelines/:timeline_id')
+    updateOrderTimeline(@Param('timeline_id') timelineId:string, @GetVendorId() vendorId:string) {
+        return this.ordersService.updateOrderTimeline(timelineId, vendorId);
+    }
+
     @Get('/customer')
     customerOrders(@AuthUser() user:User, @Query() query:OrderSearchDto, @GetPagination() pagination:PaginationDto) {
         return this.ordersService.customerOrders(user, query, pagination);

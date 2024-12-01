@@ -136,8 +136,6 @@ export class OrdersService {
         let deliveryFee = 0;
         let km = 0;
         let duration: string;
-        console.log(origin)
-        console.log(destination)
         if (shipping_method && shipping_method === SHIPPING_METHOD.HOME_DELIVERY) {
             console.log('home delivery')
             const googleService = useGoogleMapServices()
@@ -185,8 +183,8 @@ export class OrdersService {
     async findOrder(orderId:string):Promise<Order | undefined>{
         return await Order.findOne({
             where: {id: orderId},
-            relations: {timelines: true, vendor: true, products: true},
-            select: {vendor: {name: true, id: true, verified: true, logo: true}},
+            relations: {timelines: true, vendor: true, products: true, user:true},
+            select: {vendor: {name: true, id: true, verified: true, logo: true}, user:{full_name:true, id:true, profile_picture:true}},
             order: {timelines: {timeline: {order: 'ASC'}}}
         })
     }
@@ -198,6 +196,20 @@ export class OrdersService {
         order.status = ORDER_STATUS.CANCELLED;
         order.is_active = false;
         await order.save();
+        return successResponse({order})
+    }
+
+    async updateOrderTimeline(orderTimelineId: string, vendorId:string) {
+        const orderTimeline = await OrderTimeline.findOne({where:{id:orderTimelineId}});
+        if(!orderTimeline) returnErrorResponse('Timeline does not exist');
+        let order = await this.findOrder(orderTimeline.order_id)
+        if (!order) returnErrorResponse('Order does not exist')
+        if(order.status != ORDER_STATUS.ONGOING){
+            return successResponse({order})
+        }
+        orderTimeline.status = !orderTimeline.status;
+        await orderTimeline.save()
+        order = await this.findOrder(orderTimeline.order_id)
         return successResponse({order})
     }
 
