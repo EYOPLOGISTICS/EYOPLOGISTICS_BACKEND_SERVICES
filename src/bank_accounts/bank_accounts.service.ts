@@ -44,7 +44,7 @@ export class BankAccountsService {
         bank.recipient_id = bankAccountExistAndBelongsToVendor ? bankAccountExistAndBelongsToVendor.recipient_id : paystack_recipient.id;
         bank.vendor_id = vendor.id;
         bank.user_id = vendor.owner_id;
-        bank.account_number = paystack_recipient.details.account_number;
+        bank.account_number = bankAccountExistAndBelongsToVendor ? bankAccountExistAndBelongsToVendor.account_number : paystack_recipient.details.account_number;
         bank.bank_id = verified_bank_details.bank_id;
         await bank.save();
         vendor.has_bank_account = true;
