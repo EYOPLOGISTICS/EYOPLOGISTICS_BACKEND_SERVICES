@@ -231,7 +231,14 @@ export class OrdersService {
             }
         }
         const [orders, count] = await Order.findAndCount({
-            relations:{products:true, timelines:true},
+            relations:{products:true, timelines:true, user:true},
+            select:{
+              user:{
+                  id:true,
+                  full_name:true,
+                  phone_number:true
+              }
+            },
             where: conditions,
             order: {created_at: 'DESC'},
             skip: pagination.offset,

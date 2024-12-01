@@ -6,6 +6,7 @@ import {OrderProduct} from "./order-products.entity";
 import {OrderTimeline} from "./order_timeline.entity";
 import {Vendor} from "../../vendors/entities/vendor.entity";
 import {Rating} from "../../ratings/entities/rating.entity";
+import {User} from "../../users/entities/user.entity";
 @Entity('orders')
 export class Order extends EyopBaseEntity{
     @Column({nullable:false})
@@ -83,6 +84,10 @@ export class Order extends EyopBaseEntity{
     @ManyToOne(() => Vendor, (vendor) => vendor)
     @JoinColumn({name:'vendor_id'})
     vendor:Vendor
+
+    @ManyToOne(() => User, (user) => user)
+    @JoinColumn({name:'user_id'})
+    user:User
 
     @OneToMany(() => OrderProduct, (orderProducts) => orderProducts.order)
     products:OrderProduct[]
