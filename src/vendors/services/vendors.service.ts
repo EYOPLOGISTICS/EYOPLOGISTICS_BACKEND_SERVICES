@@ -112,7 +112,6 @@ export class VendorsService {
     }
 
     async products(searchProductDto: SearchProductsDto, vendorId: string, pagination: PaginationDto) {
-        const { offset, limit,} = searchProductDto;
         const {
             products,
             total_rows
