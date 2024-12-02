@@ -33,7 +33,7 @@ export class ProductsService {
         } = createProductDto;
         const category = await Category.findOneBy({id: category_id})
         if (!category) returnErrorResponse('Category does not exist')
-        const subCategory = await SubCategory.findOne({where: {slug: sub_category_id}})
+        const subCategory = await SubCategory.findOne({where: {id: sub_category_id}})
         if (!subCategory) returnErrorResponse('Sub Category does not exist')
         const slug = useSlugify(name)
         if (await Product.findOne({where: {slug}})) returnErrorResponse('Product name already exists')
