@@ -11,14 +11,16 @@ import {CreateProductDto, SearchProductsDto} from "../../products/dto/create-pro
 import {Vendor} from "../entities/vendor.entity";
 import {BankAccountsService} from "../../bank_accounts/bank_accounts.service";
 import {VendorCategory} from "../entities/category.entity";
+import {ProductsService} from "../../products/services/products.service";
+import {UpdateProductDto} from "../../products/dto/update-product.dto";
 
 @Controller('vendors')
 export class VendorsController {
-    constructor(private readonly vendorsService: VendorsService, private bankAccountService: BankAccountsService) {
+    constructor(private productService: ProductsService, private readonly vendorsService: VendorsService, private bankAccountService: BankAccountsService) {
     }
 
     @Get('/categories/collections')
-    async getVendorCategories(){
+    async getVendorCategories() {
         const categories = await VendorCategory.find();
         return successResponse({categories})
     }
@@ -29,8 +31,8 @@ export class VendorsController {
     }
 
     @Get()
-    vendors(@Query() vendorSearchDto:VendorSearchDto, @AuthUser() viewer: User, @GetPagination() pagination: PaginationDto) {
-        return this.vendorsService.vendorsCustomer(vendorSearchDto,viewer, pagination);
+    vendors(@Query() vendorSearchDto: VendorSearchDto, @AuthUser() viewer: User, @GetPagination() pagination: PaginationDto) {
+        return this.vendorsService.vendorsCustomer(vendorSearchDto, viewer, pagination);
     }
 
     @Get('/stores')
@@ -39,13 +41,18 @@ export class VendorsController {
     }
 
     @Get('/auth')
-    authLoggedInVendor(@GetVendor() vendor:Vendor) {
+    authLoggedInVendor(@GetVendor() vendor: Vendor) {
         return successResponse({vendor});
     }
 
     @Post('/products')
     createProduct(@AuthUser() creator: User, @Body() createProductDto: CreateProductDto, @GetVendorId() vendor: string) {
         return this.vendorsService.createProduct(createProductDto, vendor, creator);
+    }
+
+    @Patch('/products/:product_id')
+    async updateProduct(@Param('product_id') productId: string, @AuthUser() creator: User, @Body() updateProductDto: UpdateProductDto, @GetVendorId() vendor: string) {
+        return successResponse(await this.productService.update(productId, updateProductDto, vendor, creator));
     }
 
     @Get('/products')

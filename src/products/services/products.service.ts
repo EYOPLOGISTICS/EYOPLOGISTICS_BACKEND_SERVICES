@@ -113,6 +113,45 @@ export class ProductsService {
     //
     // }
 
+    async update(id: string,updateProductDto: UpdateProductDto, vendor: string, creator: User): Promise<Product | any> {
+        const {
+            name,
+            description,
+            selling_price,
+            sub_category_id,
+            vat,
+            cost_price,
+            discount,
+            category_id,
+            quantity,
+            image_url
+        } = updateProductDto;
+        const category = await Category.findOneBy({id: category_id})
+        if (!category) returnErrorResponse('Category does not exist')
+        const subCategory = await SubCategory.findOne({where: {id: sub_category_id}})
+        if (!subCategory) returnErrorResponse('Sub Category does not exist')
+        const slug = useSlugify(name)
+        const product = await Product.findOne({where: {id}});
+        if (!product) returnErrorResponse('Product does not exist');
+        product.name = name;
+        product.slug = slug;
+        product.description = description;
+        product.vendor_id = vendor;
+        product.selling_price = selling_price;
+        product.cost_price = cost_price;
+        product.vat = vat ?? 0;
+        product.category_id = category.id;
+        product.sub_category_id = subCategory.id;
+        product.category_name = category.name;
+        product.sub_category_name = subCategory.name;
+        product.quantity = quantity;
+        product.image_count = 1;
+        if(image_url != null) product.image_url = image_url;
+        product.discount = discount ?? 0;
+        await product.save();
+        return product;
+    }
+
     async remove(productId: string, vendor: string): Promise<Product | any> {
         const product = await Product.findOne({where: {id: productId}})
         if (!product) returnErrorResponse('Product does not exist')
