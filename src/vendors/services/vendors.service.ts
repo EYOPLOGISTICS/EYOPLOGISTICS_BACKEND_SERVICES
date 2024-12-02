@@ -116,7 +116,7 @@ export class VendorsService {
         const {
             products,
             total_rows
-        } = await this.productService.products({vendor:vendorId, filter:searchProductDto.filter, start_date:searchProductDto.start_date, sub_category:searchProductDto.sub_category, category:searchProductDto.category, end_date:searchProductDto.end_date, limit, offset}, pagination)
+        } = await this.productService.products({vendor:vendorId, filter:searchProductDto.filter, start_date:searchProductDto.start_date, sub_category:searchProductDto.sub_category, category:searchProductDto.category, end_date:searchProductDto.end_date, limit:pagination.limit, offset:pagination.offset}, pagination)
         return successResponse({products, total_rows: total_rows})
     }
 
