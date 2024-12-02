@@ -65,6 +65,7 @@ export class ProductsService {
 
     async products(searchProductsDto: SearchProductsDto, pagination: PaginationDto): Promise<{ products: Product[], total_rows: number }> {
         const {filter, category, sub_category, vendor} = searchProductsDto;
+        console.log(searchProductsDto)
         const where = []
         const conditions = {};
         const condition2 = {};
