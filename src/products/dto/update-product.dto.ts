@@ -36,4 +36,6 @@ export class UpdateProductDto {
     // images:[string]
 
     discount:number
+
+    vat:number
 }
