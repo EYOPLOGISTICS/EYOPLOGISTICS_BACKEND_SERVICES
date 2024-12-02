@@ -47,6 +47,8 @@ export class ProductsService {
         product.vat = vat ?? 0;
         product.category_id = category.id;
         product.sub_category_id = subCategory.id;
+        product.category_name = category.name;
+        product.sub_category_name = subCategory.name;
         product.quantity = quantity;
         product.image_count = 1;
         product.discount = discount ?? 0;
