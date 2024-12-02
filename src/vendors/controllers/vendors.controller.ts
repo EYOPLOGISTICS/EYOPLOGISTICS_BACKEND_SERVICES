@@ -52,7 +52,7 @@ export class VendorsController {
 
     @Patch('/products/:product_id')
     async updateProduct(@Param('product_id') productId: string, @AuthUser() creator: User, @Body() updateProductDto: UpdateProductDto, @GetVendorId() vendor: string) {
-        return successResponse(await this.productService.update(productId, updateProductDto, vendor, creator));
+        return successResponse({product: await this.productService.update(productId, updateProductDto, vendor, creator)});
     }
 
     @Get('/products')
