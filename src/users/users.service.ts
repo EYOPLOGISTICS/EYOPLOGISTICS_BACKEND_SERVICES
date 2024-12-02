@@ -12,7 +12,8 @@ import {Card} from "../cards/entities/card.entity";
 import {NotificationsService} from "../notifications/notifications.service";
 import {SUPPORTED_COUNTRIES} from "../utils";
 import {UseOneSignal} from "../services/one-signal";
-
+import {ChangePassword} from "./dto/create-user.dto";
+const bcrypt = require("bcrypt");
 
 @Injectable()
 export class UsersService {
@@ -132,4 +133,21 @@ export class UsersService {
         return successResponse({user, message: "user removed successfully"});
     }
 
+    async changePassword(changePassword: ChangePassword, user: User) {
+        const { password, confirm_password, new_password } = changePassword;
+        if (confirm_password !== new_password) returnErrorResponse("password dont match");
+        const userData = await User.findOne({where:{id:user.id}, select:{email:true, password:true}})
+        if (!await this.comparePassword(userData.password, password)) returnErrorResponse("Invalid current password");
+        userData.password = await bcrypt.hash(new_password, 10);
+        await userData.save();
+        return successResponse("password updated successfully");
+    }
+
+    async comparePassword(hashedPassword: string, password: string): Promise<any> {
+        return await bcrypt.compare(
+            password,
+            hashedPassword
+        );
+
+    }
 }

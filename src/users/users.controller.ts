@@ -20,6 +20,7 @@ import {ApiConsumes, ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {ErrorResponseType, SuccessResponseType} from "../enums/type.enum";
 import {AuthUser} from "../decorators/user.decorator";
 import {User} from "./entities/user.entity";
+import {ChangePassword} from "./dto/create-user.dto";
 
 @ApiTags("User")
 @Controller("users")
@@ -84,5 +85,10 @@ export class UsersController {
     @Delete(":id")
     remove(@Param("id") id: string) {
         return this.usersService.remove(id);
+    }
+
+    @Patch("/change-password")
+    changePassword(@AuthUser() user: User, @Body() changePasswordDto: ChangePassword) {
+        return this.usersService.changePassword(changePasswordDto, user);
     }
 }

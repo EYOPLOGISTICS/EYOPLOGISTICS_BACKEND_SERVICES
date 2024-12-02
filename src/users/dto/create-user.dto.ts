@@ -32,3 +32,14 @@ export class CreateUserDto {
 
 }
 
+export class ChangePassword {
+  @IsNotEmpty()
+  password:string
+
+  @IsNotEmpty()
+  confirm_password:string
+
+  @IsNotEmpty()
+  new_password:string
+}
+
