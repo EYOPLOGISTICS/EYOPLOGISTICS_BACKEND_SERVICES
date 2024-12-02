@@ -112,11 +112,11 @@ export class VendorsService {
     }
 
     async products(searchProductDto: SearchProductsDto, vendorId: string, pagination: PaginationDto) {
-        const {filter, category, sub_category, offset, limit, start_date, end_date} = searchProductDto;
+        const { offset, limit,} = searchProductDto;
         const {
             products,
             total_rows
-        } = await this.productService.products({vendor:vendorId, filter, start_date, sub_category, category, end_date, limit, offset}, pagination)
+        } = await this.productService.products({vendor:vendorId, filter:searchProductDto.filter, start_date:searchProductDto.start_date, sub_category:searchProductDto.sub_category, category:searchProductDto.category, end_date:searchProductDto.end_date, limit, offset}, pagination)
         return successResponse({products, total_rows: total_rows})
     }
 
