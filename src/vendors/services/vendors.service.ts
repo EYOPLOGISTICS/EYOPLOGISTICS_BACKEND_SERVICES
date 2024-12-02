@@ -112,7 +112,7 @@ export class VendorsService {
     }
 
     async products(searchProductDto: SearchProductsDto, vendorId: string, pagination: PaginationDto) {
-        searchProductDto.vendor = vendorId;
+        searchProductDto['vendor'] = vendorId;
         const {
             products,
             total_rows
