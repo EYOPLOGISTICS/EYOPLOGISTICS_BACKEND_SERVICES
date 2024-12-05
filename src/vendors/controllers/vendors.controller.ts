@@ -81,8 +81,8 @@ export class VendorsController {
         return this.vendorsService.updateVendor(vendorId, updateVendorDto, owner);
     }
 
-    @Delete(':vendor_id')
-    removeVendor(@Param('vendor_id') vendorId: string, @AuthUser() owner: User) {
+    @Delete()
+    removeVendor(@GetVendorId() vendorId: string, @AuthUser() owner: User) {
         return this.vendorsService.removeVendor(vendorId, owner);
     }
 
