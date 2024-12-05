@@ -164,7 +164,7 @@ export class VendorsService {
         } = await mapServices.getStateFromLatAndLng(mapServices.formatLatAndLng(location.lat, location.lng))
 
         const vendor = await Vendor.findOne({where: {id: vendorId}});
-        if (vendor) returnErrorResponse('Vendor does not exist')
+        if (!vendor) returnErrorResponse('Vendor does not exist')
         vendor.name = name;
         vendor.email = email;
         vendor.logo = logo;
