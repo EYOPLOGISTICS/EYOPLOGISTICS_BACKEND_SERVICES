@@ -9,6 +9,7 @@ import {
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {join} from "path";
 import {AllExceptionFilter} from "./utils/all-exception.filter";
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
     try {
@@ -17,7 +18,8 @@ async function bootstrap() {
         app.useStaticAssets(join(__dirname, "..", "public"), {
             prefix: "/public/"
         });
-
+        app.use(bodyParser.json({limit: '50mb'}));
+        app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
         // app.useStaticAssets(resolve('./src/public'));
         // app.setBaseViewsDir(resolve('./src/views'));
         app.setViewEngine('hbs');

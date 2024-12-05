@@ -14,7 +14,7 @@ export class CreateVendorDto {
     name: string
 
     @IsNotEmpty()
-    vendor_category_slug: string
+    vendor_category_id: string
 
     @IsNotEmpty()
     description: string

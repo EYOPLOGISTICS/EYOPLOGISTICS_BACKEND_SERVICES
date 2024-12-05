@@ -22,9 +22,9 @@ export class VendorsService {
     }
 
     async createVendor(owner: User, createVendorDto: CreateVendorDto) {
-        const {name, email, phone_number, logo, location, description, vendor_category_slug} = createVendorDto;
+        const {name, email, phone_number, logo, location, description, vendor_category_id} = createVendorDto;
         // vendor category
-        const vendorCategory = await VendorCategory.findOne({where: {slug: vendor_category_slug}})
+        const vendorCategory = await VendorCategory.findOne({where: {id: vendor_category_id}})
         if (!vendorCategory) returnErrorResponse('Vendor category does not exist');
         // ensure a different vendor does not have this email
         const anotherVendorWithEmailExists = await Vendor.findOne({
@@ -140,9 +140,9 @@ export class VendorsService {
     }
 
     async updateVendor(vendorId: string, updateVendorDto: UpdateVendorDto, owner: User) {
-        const {name, email, phone_number, logo, location, description, vendor_category_slug} = updateVendorDto;
+        const {name, email, phone_number, logo, location, description, vendor_category_id} = updateVendorDto;
         // vendor category
-        const vendorCategory = await VendorCategory.findOne({where: {slug: vendor_category_slug}})
+        const vendorCategory = await VendorCategory.findOne({where: {id: vendor_category_id}})
         if (!vendorCategory) returnErrorResponse('Vendor category does not exist');
         // ensure a different vendor does not have this email
         const anotherVendorWithEmailExists = await Vendor.findOne({
@@ -157,7 +157,11 @@ export class VendorsService {
         })
         if (anotherVendorWithPhoneExists) returnErrorResponse('A vendor with that email already exists')
         const mapServices = useGoogleMapServices();
-        const mapResponse = await mapServices.getStateFromLatAndLng(mapServices.formatLatAndLng(location.lat, location.lng))
+        const {
+            state,
+            address,
+            country
+        } = await mapServices.getStateFromLatAndLng(mapServices.formatLatAndLng(location.lat, location.lng))
 
         const vendor = await Vendor.findOne({where: {id: vendorId}});
         if (vendor) returnErrorResponse('Vendor does not exist')
@@ -165,6 +169,9 @@ export class VendorsService {
         vendor.email = email;
         vendor.logo = logo;
         vendor.description = description;
+        vendor.country = country;
+        vendor.city = state;
+        vendor.address = address;
         vendor.location = location;
         vendor.owner_id = owner.id;
         await vendor.save()
