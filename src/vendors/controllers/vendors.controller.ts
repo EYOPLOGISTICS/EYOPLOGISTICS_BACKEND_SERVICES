@@ -70,7 +70,7 @@ export class VendorsController {
         return this.vendorsService.dashboard(vendorId);
     }
 
-    @Get('/vendor/earnings')
+    @Get('/earnings')
     earnings(@GetVendorId() vendorId: string, @GetPagination() pagination:PaginationDto) {
         return this.vendorsService.earningAndPayouts(vendorId, pagination);
     }
