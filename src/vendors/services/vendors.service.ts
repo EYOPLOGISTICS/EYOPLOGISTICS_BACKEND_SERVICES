@@ -162,7 +162,7 @@ export class VendorsService {
             earnings,
             total_amount: totalAmount ?? 0,
             total_product_sold: totalProductSold.total_product_sold ?? 0,
-            total_earning: totalEarning ?? 0
+            total_earning: totalEarning != null ? totalEarning : 0
         })
 
     }
