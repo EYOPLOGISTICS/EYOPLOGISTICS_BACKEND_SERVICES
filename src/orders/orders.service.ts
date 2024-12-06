@@ -52,7 +52,7 @@ export class OrdersService {
         order.shipping_address = shipping_address;
         order.shipping_location = shipping_location;
         order.shipping_location = shipping_location;
-        order.tracking_id = generateTrackingCode().toString();
+        order.tracking_id = `#${generateTrackingCode().toString()}`;
         order.shipping_method = shipping_method;
         order.cart_total = cart.total;
         // calculate delivery fee
