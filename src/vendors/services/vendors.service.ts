@@ -154,7 +154,8 @@ export class VendorsService {
 
         const totalEarning = await Order.sum('total_profit', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
         const vendor = await Vendor.findOne({where: {id: vendorId}, select: {id: true, balance: true}})
-
+        console.log(totalEarning)
+        console.log(totalProductSold)
         return successResponse({
             total_rows: count,
             balance: vendor.balance,
