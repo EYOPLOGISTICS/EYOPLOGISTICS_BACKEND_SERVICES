@@ -72,7 +72,7 @@ export class AuthService {
     async resetPassword(resetPasswordDto:ResetPasswordDto){
         const { confirm_password, new_password, email } = resetPasswordDto;
         if (confirm_password !== new_password) returnErrorResponse("password dont match");
-        const user = await User.findOne({where:{email}, select:{email:true, password:true}})
+        const user = await User.findOne({where:{email}, select:{id:true,email:true, password:true}})
         if (!user) returnErrorResponse("User does not exist");
         user.password = await bcrypt.hash(new_password, 10);
         await user.save();

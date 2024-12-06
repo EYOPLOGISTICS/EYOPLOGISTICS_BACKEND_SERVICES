@@ -44,7 +44,6 @@ export class User extends EyopBaseEntity {
     @Column({nullable: false, default: SUPPORTED_COUNTRIES.NIGERIA.symbol})
     currency_symbol: string;
 
-
     @Column({nullable: true})
     city: string
 
