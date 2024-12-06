@@ -9,7 +9,7 @@ import {Card} from "../cards/entities/card.entity";
 import usePaystackService from "../services/paystack";
 import {useGoogleMapServices} from "../services/map";
 import {Vendor} from "../vendors/entities/vendor.entity";
-import {generateTrackingCode, getPaystackFee} from "../utils";
+import {calDiscount, generateTrackingCode, getPaystackFee} from "../utils";
 import {PaginationDto} from "../decorators/pagination-decorator";
 import {Timeline} from "./entities/timeline.entity";
 import {OrderTimeline} from "./entities/order_timeline.entity";
@@ -75,6 +75,7 @@ export class OrdersService {
         for (const cartProduct of cart.cart_products) {
             const orderProduct = new OrderProduct();
             orderProduct.order_id = order.id;
+            orderProduct.vendor_id = vendor.id;
             orderProduct.product_name = cartProduct.product.name;
             orderProduct.product_cost_price = cartProduct.product.cost_price;
             orderProduct.product_selling_price = cartProduct.product.selling_price;
@@ -82,6 +83,8 @@ export class OrdersService {
             orderProduct.product_discount = parseInt(cartProduct.product_discount);
             orderProduct.product_id = cartProduct.product_id;
             orderProduct.product_image = cartProduct.product.image_url;
+            const profit = (cartProduct.product.selling_price - cartProduct.product.cost_price) * cartProduct.product_quantity;
+            orderProduct.profit = cartProduct.product.discount ? calDiscount(profit, cartProduct.product.discount) : profit;
             orderProduct.total = cartProduct.total;
             await orderProduct.save();
         }
@@ -166,11 +169,11 @@ export class OrdersService {
         // send mail to vendor & customer
     }
 
-    async completeOrder(orderId: string, user:User) {
+    async completeOrder(orderId: string, user: User) {
         const order = await this.findOrder(orderId)
         if (!order) returnErrorResponse('Order does not exist')
         if (order.status === ORDER_STATUS.CANCELLED || order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.FAILED) returnErrorResponse('Could not complete this action')
-        for(const time of order.timelines){
+        for (const time of order.timelines) {
             time.status = true;
             await time.save();
         }
@@ -180,16 +183,19 @@ export class OrdersService {
         return successResponse({order})
     }
 
-    async findOrder(orderId:string):Promise<Order | undefined>{
+    async findOrder(orderId: string): Promise<Order | undefined> {
         return await Order.findOne({
             where: {id: orderId},
-            relations: {timelines: true, vendor: true, products: true, user:true},
-            select: {vendor: {name: true, id: true, verified: true, logo: true}, user:{full_name:true, id:true, profile_picture:true}},
+            relations: {timelines: true, vendor: true, products: true, user: true},
+            select: {
+                vendor: {name: true, id: true, verified: true, logo: true},
+                user: {full_name: true, id: true, profile_picture: true}
+            },
             order: {timelines: {timeline: {order: 'ASC'}}}
         })
     }
 
-    async cancelOrder(orderId: string, user:User) {
+    async cancelOrder(orderId: string, user: User) {
         const order = await this.findOrder(orderId)
         if (!order) returnErrorResponse('Order does not exist')
         if (order.status === ORDER_STATUS.CANCELLED || order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.FAILED) returnErrorResponse('Could not complete this action')
@@ -199,12 +205,12 @@ export class OrdersService {
         return successResponse({order})
     }
 
-    async updateOrderTimeline(orderTimelineId: string, vendorId:string) {
-        const orderTimeline = await OrderTimeline.findOne({where:{id:orderTimelineId}});
-        if(!orderTimeline) returnErrorResponse('Timeline does not exist');
+    async updateOrderTimeline(orderTimelineId: string, vendorId: string) {
+        const orderTimeline = await OrderTimeline.findOne({where: {id: orderTimelineId}});
+        if (!orderTimeline) returnErrorResponse('Timeline does not exist');
         let order = await this.findOrder(orderTimeline.order_id)
         if (!order) returnErrorResponse('Order does not exist')
-        if(order.status != ORDER_STATUS.ONGOING){
+        if (order.status != ORDER_STATUS.ONGOING) {
             return successResponse({order})
         }
         orderTimeline.status = !orderTimeline.status;
@@ -224,7 +230,7 @@ export class OrdersService {
         }
         console.log(conditions)
         const [orders, count] = await Order.findAndCount({
-            relations: {timelines: true, vendor: true, products: true, rating:true},
+            relations: {timelines: true, vendor: true, products: true, rating: true},
             select: {vendor: {name: true, id: true, verified: true, logo: true}},
             where: conditions,
             order: {created_at: 'DESC'},
@@ -243,13 +249,13 @@ export class OrdersService {
             }
         }
         const [orders, count] = await Order.findAndCount({
-            relations:{products:true, timelines:true, user:true},
-            select:{
-              user:{
-                  id:true,
-                  full_name:true,
-                  phone_number:true
-              }
+            relations: {products: true, timelines: true, user: true},
+            select: {
+                user: {
+                    id: true,
+                    full_name: true,
+                    phone_number: true
+                }
             },
             where: conditions,
             order: {created_at: 'DESC'},

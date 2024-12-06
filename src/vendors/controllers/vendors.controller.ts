@@ -70,6 +70,11 @@ export class VendorsController {
         return this.vendorsService.dashboard(vendorId);
     }
 
+    @Get('/vendor/earnings')
+    earnings(@GetVendorId() vendorId: string, @GetPagination() pagination:PaginationDto) {
+        return this.vendorsService.earningAndPayouts(vendorId, pagination);
+    }
+
     @Delete('/products/:product_id')
     removeProduct(@Param('product_id') productId: string, @AuthUser() remover: User, @GetVendorId() vendor: string) {
         return this.vendorsService.removeProduct(productId, vendor, remover);

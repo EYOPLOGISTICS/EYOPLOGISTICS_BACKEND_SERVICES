@@ -8,6 +8,9 @@ export class OrderProduct extends EyopBaseEntity{
     @Column({nullable:true})
     product_name:string
 
+    @Column({nullable:true})
+    vendor_id:string
+
     @Column({nullable:false})
     product_id:string
 
@@ -16,6 +19,9 @@ export class OrderProduct extends EyopBaseEntity{
 
     @Column({nullable:false})
     product_image:string
+
+    @Column({nullable:true})
+    profit:number
 
     @Column({nullable:false})
     product_quantity:number

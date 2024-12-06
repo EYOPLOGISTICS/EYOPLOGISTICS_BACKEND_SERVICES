@@ -179,5 +179,10 @@ export function useSlugify(string) {
     });
 }
 
+export const calDiscount = (amount:number, discount:number) => {
+    const discountedAmount =  (amount / 100) * discount;
+    return amount - discountedAmount;
+}
+
 
 

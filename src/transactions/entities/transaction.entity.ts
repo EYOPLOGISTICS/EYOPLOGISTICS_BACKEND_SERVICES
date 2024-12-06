@@ -29,7 +29,6 @@ export class Transaction extends EyopBaseEntity {
     @Column({nullable: false})
     user_id: string;
 
-
     @Column({nullable: false, default: STATUS.SUCCESS})
     status: STATUS;
 

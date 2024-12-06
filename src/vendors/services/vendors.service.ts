@@ -15,6 +15,8 @@ import {NotificationsService} from "../../notifications/notifications.service";
 import {Rating} from "../../ratings/entities/rating.entity";
 import {Order} from "../../orders/entities/order.entity";
 import {ORDER_STATUS} from "../../enums/type.enum";
+import {Transaction} from "../../transactions/entities/transaction.entity";
+import {OrderProduct} from "../../orders/entities/order-products.entity";
 
 @Injectable()
 export class VendorsService {
@@ -90,8 +92,8 @@ export class VendorsService {
             phone_number: true,
             city: true,
             country: true,
-            total_rating:true,
-            rating_count:true
+            total_rating: true,
+            rating_count: true
         }
 
         const [vendors, count] = await Vendor.findAndCount({
@@ -100,10 +102,16 @@ export class VendorsService {
             skip: pagination.offset,
             select
         })
-        for (const vendor of vendors){
-          vendor['ratings'] =  await Rating.find({where: {vendor_id: vendor.id}, take: 1, order: {created_at: 'DESC'}, relations:{user:true}, select:{user:{full_name:true, profile_picture:true, id:true}}})
+        for (const vendor of vendors) {
+            vendor['ratings'] = await Rating.find({
+                where: {vendor_id: vendor.id},
+                take: 1,
+                order: {created_at: 'DESC'},
+                relations: {user: true},
+                select: {user: {full_name: true, profile_picture: true, id: true}}
+            })
         }
-        return successResponse({vendors, total_rows:count})
+        return successResponse({vendors, total_rows: count})
     }
 
     async vendorsOwner(viewer: User) {
@@ -126,11 +134,36 @@ export class VendorsService {
         return successResponse({product})
     }
 
-    async dashboard(vendorId:string){
-        const totalSales = await Order.sum('order_total', {status:ORDER_STATUS.COMPLETED, vendor_id:vendorId})
-        const totalProducts = await Product.count({where:{vendor_id:vendorId}})
-        const pendingOrders = await Order.count({where:{vendor_id:vendorId, status:ORDER_STATUS.ONGOING}})
-        return successResponse({total_sales:totalSales, total_product:totalProducts, pending_orders:pendingOrders})
+    async dashboard(vendorId: string) {
+        const totalSales = await Order.sum('order_total', {status: ORDER_STATUS.COMPLETED, vendor_id: vendorId})
+        const totalProducts = await Product.count({where: {vendor_id: vendorId}})
+        const pendingOrders = await Order.count({where: {vendor_id: vendorId, status: ORDER_STATUS.ONGOING}})
+        return successResponse({total_sales: totalSales, total_product: totalProducts, pending_orders: pendingOrders})
+    }
+
+    async earningAndPayouts(vendorId: string, pagination: PaginationDto) {
+        const [earnings, count] = await Transaction.findAndCount({
+            where: {user_id: vendorId},
+            skip: pagination.offset,
+            take: pagination.limit
+        })
+        const totalAmount = await Order.sum('cart_total', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
+        const totalProductSold = await OrderProduct.count({
+            relations: {order: true},
+            where: {order: {vendor_id: vendorId}}
+        })
+        const totalEarning = await Order.sum('cart_total', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
+        const vendor = await Vendor.findOne({where:{id:vendorId}, select:{id:true, balance:true}})
+
+        return successResponse({
+            total_rows: count,
+            balance:vendor.balance,
+            earnings,
+            total_amount: totalAmount,
+            total_product_sold: totalProductSold,
+            total_earning: totalEarning
+        })
+
     }
 
     async removeProduct(productId: string, vendor: string, remover: User) {
