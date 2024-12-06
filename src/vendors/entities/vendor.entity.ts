@@ -1,5 +1,5 @@
 import {EyopBaseEntity} from "../../abstract/osr-base-entity";
-import {Column, Entity, JoinColumn, ManyToOne} from "typeorm";
+import {AfterLoad, Column, Entity, JoinColumn, ManyToOne} from "typeorm";
 import {MapDto} from "../dto/create-vendor.dto";
 import {SUPPORTED_COUNTRIES} from "../../utils";
 import {User} from "../../users/entities/user.entity";
@@ -73,6 +73,8 @@ export class Vendor extends EyopBaseEntity {
     @Column({name:'owner_id'})
     owner_id:string
 
+    ellipse_address:string
+
     @ManyToOne(() => User, (owner) =>owner, {
         onDelete:'CASCADE',
     })
@@ -81,4 +83,9 @@ export class Vendor extends EyopBaseEntity {
 
     @Column({default:true})
     is_active:boolean
+
+    @AfterLoad()
+    setAddress(){
+        this.ellipse_address = this.address.length > 5 ? this.address.substring(0, 5) + '...' : this.address
+    }
 }
