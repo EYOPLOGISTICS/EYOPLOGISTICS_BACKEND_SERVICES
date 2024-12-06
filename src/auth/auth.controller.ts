@@ -12,6 +12,7 @@ import {DOMAIN} from "../decorators/domain.decorator";
 import {usePusher} from "../services/pusher";
 import {QueueService} from "../queues/queue.service";
 import {RatingsService} from "../ratings/ratings.service";
+import {ResetPasswordDto} from "../users/dto/create-user.dto";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -42,6 +43,12 @@ export class AuthController {
     @Post("login")
     signIn(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
+    }
+
+    @Public()
+    @Post("reset/password")
+    resetPassword(@Body() resetPassword: ResetPasswordDto) {
+        return this.authService.resetPassword(resetPassword);
     }
 
 

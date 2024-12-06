@@ -43,3 +43,13 @@ export class ChangePassword {
   new_password:string
 }
 
+
+export class ResetPasswordDto {
+  @IsNotEmpty()
+  email:string
+  @IsNotEmpty()
+  new_password:string
+
+  @IsNotEmpty()
+  confirm_password:string
+}

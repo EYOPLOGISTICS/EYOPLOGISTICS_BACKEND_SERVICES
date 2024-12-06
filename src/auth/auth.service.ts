@@ -8,6 +8,7 @@ import {DOMAIN_TYPE} from "../enums/type.enum";
 import {Role} from "../enums/role.enum";
 import {User} from "../users/entities/user.entity";
 import {RatingsService} from "../ratings/ratings.service";
+import {ResetPasswordDto} from "../users/dto/create-user.dto";
 
 const bcrypt = require("bcrypt");
 
@@ -67,7 +68,16 @@ export class AuthService {
         return successResponse('email verified successfully')
 
     }
-
+    
+    async resetPassword(resetPasswordDto:ResetPasswordDto){
+        const { confirm_password, new_password, email } = resetPasswordDto;
+        if (confirm_password !== new_password) returnErrorResponse("password dont match");
+        const user = await User.findOne({where:{email}, select:{email:true, password:true}})
+        if (!user) returnErrorResponse("User does not exist");
+        user.password = await bcrypt.hash(new_password, 10);
+        await user.save();
+        return successResponse("password reset successfully");
+    }
 
     async comparePassword(hashedPassword: string, password: string): Promise<any> {
         return await bcrypt.compare(
