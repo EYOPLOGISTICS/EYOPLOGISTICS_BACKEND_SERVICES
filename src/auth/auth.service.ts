@@ -68,7 +68,7 @@ export class AuthService {
         return successResponse('email verified successfully')
 
     }
-    
+
     async resetPassword(resetPasswordDto:ResetPasswordDto){
         const { confirm_password, new_password, email } = resetPasswordDto;
         if (confirm_password !== new_password) returnErrorResponse("password dont match");
