@@ -20,6 +20,8 @@ const {chargeCard} = usePaystackService;
 @Injectable()
 export class OrdersService {
     async create(createOrderDto: CreateOrderDto, user: User) {
+        let totalProfit = 0;
+        let totalProductSold = 0;
         const {payment_method, destination, shipping_address, cart_id, card_id, shipping_method} = createOrderDto;
         const shipping_location = destination;
         const cart = await Cart.findOne({
@@ -86,8 +88,13 @@ export class OrdersService {
             const profit = (cartProduct.product.selling_price - cartProduct.product.cost_price) * cartProduct.product_quantity;
             orderProduct.profit = cartProduct.product.discount ? calDiscount(profit, cartProduct.product.discount) : profit;
             orderProduct.total = cartProduct.total;
+            totalProfit = orderProduct.profit;
+            totalProductSold += cartProduct.product_quantity;
             await orderProduct.save();
         }
+        order.total_profit = totalProfit;
+        order.total_product_sold = totalProductSold;
+        await order.save();
         if (payment_method === PAYMENT_METHOD.CARD) {
             const card = await Card.findOne({where: {id: card_id, user_id: user.id}})
             if (!card) returnErrorResponse('could not find card for payment')

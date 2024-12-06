@@ -5,7 +5,7 @@ import {useGoogleMapServices} from "../../services/map";
 import {Vendor} from "../entities/vendor.entity";
 import {returnErrorResponse, successResponse} from "../../utils/response";
 import {User} from "../../users/entities/user.entity";
-import {Not} from "typeorm";
+import {DataSource, Not} from "typeorm";
 import {VendorCategory} from "../entities/category.entity";
 import {CreateProductDto, SearchProductsDto} from "../../products/dto/create-product.dto";
 import {PaginationDto} from "../../decorators/pagination-decorator";
@@ -20,7 +20,7 @@ import {OrderProduct} from "../../orders/entities/order-products.entity";
 
 @Injectable()
 export class VendorsService {
-    constructor(private productService: ProductsService, private notificationService: NotificationsService) {
+    constructor(private productService: ProductsService, private notificationService: NotificationsService, private dataSource: DataSource) {
     }
 
     async createVendor(owner: User, createVendorDto: CreateVendorDto) {
@@ -148,20 +148,20 @@ export class VendorsService {
             take: pagination.limit
         })
         const totalAmount = await Order.sum('cart_total', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
-        const totalProductSold = await OrderProduct.count({
-            relations: {order: true},
-            where: {order: {vendor_id: vendorId}}
-        })
-        const totalEarning = await Order.sum('cart_total', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
-        const vendor = await Vendor.findOne({where:{id:vendorId}, select:{id:true, balance:true}})
+
+        const totalProductSold = await this.dataSource.manager.createQueryBuilder(Order, "orders").where('orders.vendor_id = :vendor_id', {vendor_id: vendorId}).select("COUNT(orders.total_product_sold)", "total_product_sold")
+            .getRawOne();
+
+        const totalEarning = await Order.sum('total_profit', {vendor_id: vendorId, status: ORDER_STATUS.COMPLETED})
+        const vendor = await Vendor.findOne({where: {id: vendorId}, select: {id: true, balance: true}})
 
         return successResponse({
             total_rows: count,
-            balance:vendor.balance,
+            balance: vendor.balance,
             earnings,
-            total_amount: totalAmount,
-            total_product_sold: totalProductSold,
-            total_earning: totalEarning
+            total_amount: totalAmount ?? 0,
+            total_product_sold: totalProductSold.total_product_sold ?? 0,
+            total_earning: totalEarning ?? 0
         })
 
     }

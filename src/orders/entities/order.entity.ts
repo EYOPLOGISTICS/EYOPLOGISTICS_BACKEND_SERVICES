@@ -65,6 +65,12 @@ export class Order extends EyopBaseEntity{
     discount:number
 
     @Column({nullable:true})
+    total_profit:number
+
+    @Column({nullable:true})
+    total_product_sold:number
+
+    @Column({nullable:true})
     duration:string
 
     @Column({nullable:false})
