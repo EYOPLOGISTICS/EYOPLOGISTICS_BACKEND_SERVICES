@@ -23,8 +23,7 @@ export class User extends EyopBaseEntity {
     @Column({nullable: true, unique: true})
     phone_number: string;
 
-    @Exclude({toPlainOnly:true})
-    @Column({nullable: false})
+    @Column({nullable: false, select:false})
     password: string;
 
     @Column({nullable: true})
