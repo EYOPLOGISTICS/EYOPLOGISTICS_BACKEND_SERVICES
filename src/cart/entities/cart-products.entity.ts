@@ -27,7 +27,7 @@ export class CartProduct extends EyopBaseEntity{
     @Column({nullable:false, default:0})
     discountedAmount:number
 
-    @OneToOne(() => Product, (product) => product)
+    @ManyToOne(() => Product, (product) => product)
     @JoinColumn({name:'product_id',})
     product:Product
 
