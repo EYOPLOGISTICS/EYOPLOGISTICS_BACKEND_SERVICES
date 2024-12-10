@@ -1,6 +1,7 @@
 import {IsEmail, IsNotEmpty, IsNumber, IsString, ValidateIf, IsEnum, MinLength} from "class-validator";
 import {Transform, TransformFnParams} from "class-transformer";
 import {Role} from "../../enums/role.enum";
+import {MapDto} from "../../vendors/dto/create-vendor.dto";
 
 
 export class LoginDto {
@@ -66,6 +67,16 @@ export class SignUpDto {
     @IsNotEmpty()
     @MinLength(6)
     password: string;
+
+    @IsNotEmpty()
+    city: string;
+
+    @IsNotEmpty()
+    address: string;
+
+    @IsNotEmpty()
+    location: MapDto;
+
 
     // @ValidateIf((data) => !data.email)
     @IsNotEmpty({message:'Please input a valid phone number'})
