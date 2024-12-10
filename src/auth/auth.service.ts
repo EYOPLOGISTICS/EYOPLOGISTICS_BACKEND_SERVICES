@@ -37,7 +37,7 @@ export class AuthService {
     }
 
     async signUp(signUpDto: SignUpDto): Promise<any> {
-        const {email, phone_number, first_name, last_name, password, role} = signUpDto;
+        const {email, phone_number, first_name, last_name, password, role, location, address, city} = signUpDto;
         if (await User.findOne({where: {email}})) returnErrorResponse('a user with that email already exists')
         if (await User.findOne({where: {phone_number}})) returnErrorResponse('a user with that phone number already exists')
         const user = new User()
@@ -45,6 +45,9 @@ export class AuthService {
         user.phone_number = phone_number;
         user.first_name = first_name;
         user.last_name = last_name;
+        user.location = location;
+        user.address = address;
+        user.city = city;
         user.full_name = first_name + last_name;
         user.role = role;
         user.password = await bcrypt.hash(password, 10);
