@@ -18,7 +18,7 @@ export class Product extends EyopBaseEntity {
     @Column({nullable:false})
     slug: string
 
-    @Column({nullable:false})
+    @Column({nullable:false, type:'text'})
     description: string
 
     @Column({nullable:true})
