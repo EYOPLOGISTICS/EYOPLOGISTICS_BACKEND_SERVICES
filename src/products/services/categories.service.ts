@@ -53,7 +53,7 @@ export class CategoryService {
     }
 
     async findAll() {
-        const categories = await Category.find({relations: {sub_categories: true}, order: {name: 'ASC'}});
+        const categories = await Category.find({relations: {sub_categories: true}, order: {name: 'DESC'}});
         return successResponse({categories: categories})
     }
 
