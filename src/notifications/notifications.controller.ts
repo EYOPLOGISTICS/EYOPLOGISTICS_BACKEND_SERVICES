@@ -4,6 +4,7 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { AuthUser } from "../decorators/user.decorator";
 import { User } from "../users/entities/user.entity";
+import {GetVendorId} from "../decorators/vendor.decorator";
 
 @Controller('notifications')
 export class NotificationsController {
@@ -11,8 +12,8 @@ export class NotificationsController {
 
 
   @Get()
-  findAll(@AuthUser() user:User) {
-    return this.notificationsService.findAll(user);
+  findAll(@AuthUser() user:User, @GetVendorId() vendorId:string) {
+    return this.notificationsService.findAll(user, vendorId);
   }
 
 }

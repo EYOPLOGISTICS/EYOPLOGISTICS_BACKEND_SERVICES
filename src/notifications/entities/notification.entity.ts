@@ -11,4 +11,10 @@ export class Notification extends EyopBaseEntity {
 
   @Column()
   user_id: string;
+
+  @Column({nullable:true})
+  vendor_id: string;
+
+  @Column({nullable:true})
+  action_by: string;
 }
