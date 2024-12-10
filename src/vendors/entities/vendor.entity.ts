@@ -86,6 +86,6 @@ export class Vendor extends EyopBaseEntity {
 
     @AfterLoad()
     setAddress(){
-        this.ellipse_address = this.address != null ? this.address.length > 5 ? this.address.substring(0, 20) + '...' : this.address : this.address
+        this.ellipse_address = this.address != null ? this.address.length > 30 ? this.address.substring(0, 30) + '...' : this.address : this.address
     }
 }
