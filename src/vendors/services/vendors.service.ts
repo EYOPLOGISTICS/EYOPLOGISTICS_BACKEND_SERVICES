@@ -95,6 +95,7 @@ export class VendorsService {
             total_rating: true,
             rating_count: true,
             description:true,
+            short_description:true
         }
 
         const [vendors, count] = await Vendor.findAndCount({
