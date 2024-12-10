@@ -2,7 +2,6 @@ import {EyopBaseEntity} from "../../abstract/osr-base-entity";
 import {Column, Entity, JoinColumn, ManyToOne, OneToMany} from "typeorm";
 import {Image} from "./images.entity";
 import {Vendor} from "../../vendors/entities/vendor.entity";
-import {Rating} from "../../ratings/entities/rating.entity";
 
 @Entity('products')
 export class Product extends EyopBaseEntity {
