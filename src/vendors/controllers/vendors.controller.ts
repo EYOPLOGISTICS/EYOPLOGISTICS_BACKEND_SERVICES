@@ -45,6 +45,11 @@ export class VendorsController {
         return successResponse({vendor});
     }
 
+    @Get('/reviews/:vendor_id')
+    vendorReviews(@Param('vendor_id') vendorId:string, @GetPagination() pagination:PaginationDto) {
+        return this.vendorsService.reviews(vendorId, pagination)
+    }
+
     @Post('/products')
     createProduct(@AuthUser() creator: User, @Body() createProductDto: CreateProductDto, @GetVendorId() vendor: string) {
         return this.vendorsService.createProduct(createProductDto, vendor, creator);

@@ -76,6 +76,17 @@ export class VendorsService {
         return successResponse('product created successfully')
     }
 
+    async reviews(vendorId: string, pagination: PaginationDto) {
+        const reviews = await Rating.find({
+            select: {user: {id: true, full_name: true}},
+            relations: {user: true},
+            take: pagination.limit,
+            skip: pagination.offset,
+            where: {vendor_id: vendorId}
+        })
+        return successResponse({ratings: reviews})
+    }
+
     async vendorsCustomer(vendorSearchDto: VendorSearchDto, viewer: User, pagination: PaginationDto) {
         const {category_id, location, location_address, name} = vendorSearchDto;
         const conditions = {};
@@ -94,8 +105,8 @@ export class VendorsService {
             country: true,
             total_rating: true,
             rating_count: true,
-            description:true,
-            short_description:true
+            description: true,
+            short_description: true
         }
 
         const [vendors, count] = await Vendor.findAndCount({
