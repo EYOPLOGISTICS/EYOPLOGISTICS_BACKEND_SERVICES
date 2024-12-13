@@ -281,7 +281,7 @@ export class OrdersService {
 
     async vendorsOrders(vendorId: string, query: OrderSearchDto, pagination: PaginationDto) {
         const {status} = query;
-        const conditions = {vendor_id: vendorId}
+        const conditions = {vendor_id: vendorId, payment_status:PAYMENT_STATUS.PAID}
         if (status) {
             if (status !== ORDER_STATUS.ALL) {
                 conditions['status'] = status
