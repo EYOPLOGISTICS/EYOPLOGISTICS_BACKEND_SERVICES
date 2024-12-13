@@ -261,7 +261,7 @@ export class OrdersService {
 
     async customerOrders(user: User, query: OrderSearchDto, pagination: PaginationDto) {
         const {status} = query;
-        const conditions = {user_id: user.id}
+        const conditions = {user_id: user.id, payment_status:PAYMENT_STATUS.PAID}
         if (status) {
             if (status !== ORDER_STATUS.ALL) {
                 conditions['status'] = status
