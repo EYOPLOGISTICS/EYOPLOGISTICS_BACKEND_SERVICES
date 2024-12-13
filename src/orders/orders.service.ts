@@ -216,7 +216,7 @@ export class OrdersService {
             amount: order.cart_total,
             transfer_id: transferResponse.id,
             status: transferResponse.status,
-            title: "Order Payout",
+            title: `Order Payout to ${bankAccount.account_name}`,
             type: TRANSACTION_TYPE.TRANSFER,
             payment_reference: transferResponse.reference
         })
