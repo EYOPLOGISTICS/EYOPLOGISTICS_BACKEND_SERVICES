@@ -82,7 +82,7 @@ export class OrdersService {
         order.delivery_fee = delivery_fee;
         order.order_total = total;
         order.km = km;
-        order.duration = duration;
+        order.duration = duration ?? '0';
         order.discount = cart.total_discount;
         await order.save();
 
