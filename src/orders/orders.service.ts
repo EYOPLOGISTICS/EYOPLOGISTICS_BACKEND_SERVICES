@@ -4,7 +4,16 @@ import {User} from "../users/entities/user.entity";
 import {Cart} from "../cart/entities/cart.entity";
 import {returnErrorResponse, successResponse} from "../utils/response";
 import {Order} from "./entities/order.entity";
-import {ORDER_STATUS, ORDER_TIMELINE, PAYMENT_METHOD, PAYMENT_STATUS, SHIPPING_METHOD} from "../enums/type.enum";
+import {
+    ORDER_STATUS,
+    ORDER_TIMELINE,
+    PAYMENT_METHOD,
+    PAYMENT_STATUS,
+    SHIPPING_METHOD,
+    STATUS,
+    TRANSACTION_METHOD,
+    TRANSACTION_TYPE
+} from "../enums/type.enum";
 import {Card} from "../cards/entities/card.entity";
 import usePaystackService from "../services/paystack";
 import {useGoogleMapServices} from "../services/map";
@@ -14,11 +23,16 @@ import {PaginationDto} from "../decorators/pagination-decorator";
 import {Timeline} from "./entities/timeline.entity";
 import {OrderTimeline} from "./entities/order_timeline.entity";
 import {OrderProduct} from "./entities/order-products.entity";
+import {BankAccount} from "../bank_accounts/entities/bank_account.entity";
+import {TransactionsService} from "../transactions/transactions.service";
 
 const {chargeCard} = usePaystackService;
 
 @Injectable()
 export class OrdersService {
+    constructor(private transactionService: TransactionsService) {
+    }
+
     async create(createOrderDto: CreateOrderDto, user: User) {
         let totalProfit = 0;
         let totalProductSold = 0;
@@ -187,7 +201,25 @@ export class OrdersService {
         order.status = ORDER_STATUS.COMPLETED;
         order.is_active = false;
         await order.save();
+        this.processVendorEarning(order);
         return successResponse({order})
+    }
+
+
+    async processVendorEarning(order: Order) {
+        const vendor = await Vendor.findOne({where: {id: order.vendor_id}, select: {balance: true, id: true}})
+        const bankAccount = await BankAccount.findOne({where: {vendor_id: vendor.id}})
+        const transferResponse = await usePaystackService.initiateTransfer(order.cart_total, bankAccount.recipient_code)
+        await this.transactionService.create({
+            method: TRANSACTION_METHOD.TRANSFER,
+            user_id: vendor.id,
+            amount: order.cart_total,
+            transfer_id: transferResponse.id,
+            status: transferResponse.status,
+            title: "Order Payout",
+            type: TRANSACTION_TYPE.TRANSFER,
+            payment_reference: transferResponse.reference
+        })
     }
 
     async findOrder(orderId: string): Promise<Order | undefined> {

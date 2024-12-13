@@ -112,9 +112,9 @@ export class TransactionsService {
                 case PAYSTACK_WEBHOOK_EVENTS.TRANSFER_FAILED || PAYSTACK_WEBHOOK_EVENTS.TRANSFER_REVERSED:
                     transaction.status = STATUS.FAILED;
                     await transaction.save();
-                    await this.userService.creditUserWallet(user, transaction.amount, true);
+                    // await this.userService.creditUserWallet(user, transaction.amount, true);
                     await this.notificationsService.create({
-                        title: "Transfer failed...",
+                        title: "Payout failed...",
                         user,
                         message: `Transfer of ${transaction.amount} from your wallet to your bank account was not successful`
                     });

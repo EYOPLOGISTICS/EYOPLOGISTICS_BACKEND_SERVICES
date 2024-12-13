@@ -14,8 +14,6 @@ export class Vendor extends EyopBaseEntity {
 
     @Column({nullable: false, type:'text'})
     description: string
-
-    @Column({nullable: false, type:'text'})
     short_description: string
 
     @Column({nullable: false})

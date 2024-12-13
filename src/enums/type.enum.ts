@@ -57,6 +57,8 @@ export enum TRANSACTION_METHOD {
 export enum TRANSACTION_TYPE {
   CREDIT = "credit",
   DEBIT = "debit",
+
+  TRANSFER = "transfer"
 }
 
 export enum PAYMENT_TYPE {

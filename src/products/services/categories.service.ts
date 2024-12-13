@@ -10,7 +10,6 @@ import {VendorCategory} from "../../vendors/entities/category.entity";
 
 @Injectable()
 export class CategoryService {
-
     async createVendorCategory(createVendorCategoryDto: CreateVendorCategoryDto) {
         const {name, image} = createVendorCategoryDto;
         const slug = useSlugify(name)
@@ -33,7 +32,6 @@ export class CategoryService {
         await category.save();
         return successResponse({category, message: 'category created successfully'})
     }
-
     async createSubCategory(createSubCategoryDto: CreateSubCategoryDto) {
         const {name, image, category_id} = createSubCategoryDto;
         const slug = useSlugify(name)
@@ -48,24 +46,12 @@ export class CategoryService {
     }
 
     async vendorCategories() {
-        const vendorCategories = await VendorCategory.find({order: {name: 'ASC',}});
+        const vendorCategories = await VendorCategory.find({order: {name: 'ASC'}});
         return successResponse({vendor_categories: vendorCategories})
     }
-
     async findAll() {
         const categories = await Category.find({relations: {sub_categories: true}, order: {name: 'DESC'}});
         return successResponse({categories: categories})
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} product`;
-    }
-
-    update(id: number, updateProductDto: UpdateProductDto) {
-        return `This action updates a #${id} product`;
-    }
-
-    async remove(id: string) {
-
-    }
 }
