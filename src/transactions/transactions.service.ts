@@ -58,8 +58,8 @@ export class TransactionsService {
         if (currency) transaction.currency = currency;
         if (title) transaction.title = title;
         await transaction.save();
-        const user = await this.userService.findOne(user_id, ["wallet_balance", "id"]);
-        await pusher.trigger(`private-user-${user_id}`, "new-transaction", {wallet_balance: user.wallet_balance});
+        // const user = await this.userService.findOne(user_id, ["wallet_balance", "id"]);
+        // await pusher.trigger(`private-user-${user_id}`, "new-transaction", {wallet_balance: user.wallet_balance});
         return transaction;
     }
 
