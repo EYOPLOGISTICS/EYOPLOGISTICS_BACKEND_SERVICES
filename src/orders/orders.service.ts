@@ -25,12 +25,14 @@ import {OrderTimeline} from "./entities/order_timeline.entity";
 import {OrderProduct} from "./entities/order-products.entity";
 import {BankAccount} from "../bank_accounts/entities/bank_account.entity";
 import {TransactionsService} from "../transactions/transactions.service";
+import {UseOneSignal} from "../services/one-signal";
+import {QueueService} from "../queues/queue.service";
 
 const {chargeCard} = usePaystackService;
 
 @Injectable()
 export class OrdersService {
-    constructor(private transactionService: TransactionsService) {
+    constructor(private transactionService: TransactionsService, private queueService: QueueService) {
     }
 
     async create(createOrderDto: CreateOrderDto, user: User) {
@@ -182,15 +184,35 @@ export class OrdersService {
     }
 
     async processOrder(order: Order) {
+        const onesignal = UseOneSignal();
         order.is_active = true;
         order.status = ORDER_STATUS.ONGOING;
         order.timeline_status = ORDER_TIMELINE.PROCESSING;
         await order.save();
         await this.createOrderTimeline(order)
         // send mail to vendor & customer
+        const notifyVendorAndCustomer = async () => {
+            const vendor = await Vendor.findOne({
+                where: {id: order.vendor_id},
+                select: {name: true, id: true, email: true, owner_id:true}
+            })
+            const customer = await User.findOne({where: {id: order.user_id}, select: {full_name: true, id: true}})
+
+            await onesignal.sendNotification('Order Placed', `Your order has been placed & forwarded to ${vendor.name}`, order.user_id, {})
+            await onesignal.sendNotification('New Order', `Hello ${vendor.name}, You have a new order`, vendor.owner_id, {})
+
+            await this.queueService.sendMail({
+                subject: 'New Order',
+                to: vendor.email,
+                template: '/VendorOrderPlaced',
+                context: {vendor_name: vendor.name, customer_name: customer.full_name, order_id: order.tracking_id}
+            })
+        }
+        notifyVendorAndCustomer()
     }
 
     async completeOrder(orderId: string, user: User) {
+        const onesignal = UseOneSignal();
         const order = await this.findOrder(orderId)
         if (!order) returnErrorResponse('Order does not exist')
         if (order.status === ORDER_STATUS.CANCELLED || order.status === ORDER_STATUS.COMPLETED || order.status === ORDER_STATUS.FAILED) returnErrorResponse('Could not complete this action')
@@ -202,6 +224,18 @@ export class OrdersService {
         order.is_active = false;
         await order.save();
         this.processVendorEarning(order);
+        const notify = async () => {
+            onesignal.sendNotification('Order Completed', 'Thank you for using us, hope you were satisfied with our service', order.user_id, {})
+
+            onesignal.sendNotification('Order Completed', `Hello ${order.vendor.name}, ${order.user.full_name} just completed this order(${order.tracking_id})`, order.vendor.owner_id, {})
+            await this.queueService.sendMail({
+                subject: 'Order Completed',
+                to: order.vendor.email,
+                template: '/OrderCompletedVendor',
+                context: {vendor_name: order.vendor.name, customer_name: order.user.full_name, order_id: order.tracking_id}
+            })
+        }
+        notify();
         return successResponse({order})
     }
 
@@ -227,8 +261,8 @@ export class OrdersService {
             where: {id: orderId},
             relations: {timelines: true, vendor: true, products: true, user: true},
             select: {
-                vendor: {name: true, id: true, verified: true, logo: true},
-                user: {full_name: true, id: true, profile_picture: true}
+                vendor: {name: true, id: true, verified: true, logo: true, owner_id:true, email:true},
+                user: {full_name: true, id: true, profile_picture: true, email:true}
             },
             order: {timelines: {timeline: {order: 'ASC'}}}
         })
@@ -261,7 +295,7 @@ export class OrdersService {
 
     async customerOrders(user: User, query: OrderSearchDto, pagination: PaginationDto) {
         const {status} = query;
-        const conditions = {user_id: user.id, payment_status:PAYMENT_STATUS.PAID}
+        const conditions = {user_id: user.id, payment_status: PAYMENT_STATUS.PAID}
         if (status) {
             if (status !== ORDER_STATUS.ALL) {
                 conditions['status'] = status
@@ -281,7 +315,7 @@ export class OrdersService {
 
     async vendorsOrders(vendorId: string, query: OrderSearchDto, pagination: PaginationDto) {
         const {status} = query;
-        const conditions = {vendor_id: vendorId, payment_status:PAYMENT_STATUS.PAID}
+        const conditions = {vendor_id: vendorId, payment_status: PAYMENT_STATUS.PAID}
         if (status) {
             if (status !== ORDER_STATUS.ALL) {
                 conditions['status'] = status
