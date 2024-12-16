@@ -57,7 +57,7 @@ export class UsersService {
             title: "Wallet Credit"
         });
         const onesignal = UseOneSignal();
-        onesignal.sendNotificationToDriver('Wallet Account Credited Successfully', `You wallet has been credited with ${user.currency_symbol}${amount}`, user.id, {});
+        onesignal.sendNotification('Wallet Account Credited Successfully', `You wallet has been credited with ${user.currency_symbol}${amount}`, user.id, {});
 
         return true;
     }
