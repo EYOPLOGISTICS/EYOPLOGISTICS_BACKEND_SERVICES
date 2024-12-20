@@ -14,7 +14,7 @@ export class OtpService {
             to: otpData.email,
             context: {otp: otpData.otp, email: otpData.email},
             template: "/Otp",
-            subject: "EYOPLOGISTICS OTP"
+            subject: "EYOP STORE OTP"
         });
         return true;
     }

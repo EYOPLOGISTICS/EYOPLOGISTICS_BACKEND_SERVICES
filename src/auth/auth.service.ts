@@ -10,12 +10,13 @@ import {User} from "../users/entities/user.entity";
 import {RatingsService} from "../ratings/ratings.service";
 import {ResetPasswordDto} from "../users/dto/create-user.dto";
 import {MapDto} from "../vendors/dto/create-vendor.dto";
+import {QueueService} from "../queues/queue.service";
 
 const bcrypt = require("bcrypt");
 
 @Injectable()
 export class AuthService {
-    constructor(private otpService: OtpService, private usersService: UsersService, private jwtService: JwtService, private ratingService: RatingsService,) {
+    constructor(private otpService: OtpService, private usersService: UsersService, private jwtService: JwtService, private ratingService: RatingsService, private queueService: QueueService) {
     }
 
     async login(loginDto: LoginDto): Promise<any> {
@@ -76,6 +77,8 @@ export class AuthService {
             user.verified = true;
             await user.save();
         }
+        // this.queueService.sendMail({to:user.email, subject:''})
+
         return successResponse('email verified successfully')
 
     }

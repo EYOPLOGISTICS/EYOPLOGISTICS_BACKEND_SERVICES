@@ -7,6 +7,7 @@ import {successResponse} from "../utils/response";
 import {usePusher} from "../services/pusher";
 import {Activity} from "./entities/activity.entity";
 import {Role} from "../enums/role.enum";
+
 const pusher = usePusher();
 
 @Injectable()
@@ -33,19 +34,35 @@ export class NotificationsService {
         return true;
     }
 
-    async findAll(user: User, vendorId?:string): Promise<SuccessResponseType | ErrorResponseType> {
+    async findAll(user: User, vendorId?: string): Promise<SuccessResponseType | ErrorResponseType> {
         const conditions = {};
-        if(vendorId != null){
+        if (vendorId != null) {
             conditions['vendor_id'] = vendorId;
             conditions['action_by'] = Role.VENDOR;
-        } else{
+        } else {
             conditions['user_id'] = user.id;
         }
-        const notifications = await Notification.find({
+        let notifications = await Notification.find({
             order: {created_at: 'DESC'},
             where: conditions,
             take: 50
         });
+        if (!notifications.length) {
+            if (!vendorId) {
+                const note = new Notification();
+                note.title = `Dear ${user.first_name}`;
+                note.message = `Welcome to Eyop Online Store`
+                note.user_id = user.id;
+                note.action_by = 'user';
+                await note.save();
+                notifications = await Notification.find({
+                    order: {created_at: 'DESC'},
+                    where: conditions,
+                    take: 50
+                });
+            }
+
+        }
         return successResponse({notifications});
     }
 
