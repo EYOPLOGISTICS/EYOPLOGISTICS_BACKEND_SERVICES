@@ -29,7 +29,7 @@ export class User extends EyopBaseEntity {
     @Column({nullable: true})
     gender: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true, default:'CHJ4+2J2'})
     address: string;
 
     @Column({nullable: true})
@@ -44,7 +44,7 @@ export class User extends EyopBaseEntity {
     @Column({nullable: false, default: SUPPORTED_COUNTRIES.NIGERIA.symbol})
     currency_symbol: string;
 
-    @Column({nullable: true})
+    @Column({nullable: true, default:'Lagos'})
     city: string
 
     @Column({nullable:true})
@@ -69,6 +69,7 @@ export class User extends EyopBaseEntity {
     verified: boolean;
 
     @Column({
+        default:'"{\\"lat\\":\\"6.4302155\\",\\"lng\\":\\"3.5564407\\"}"',
         nullable: true, type: "json", transformer: {
             to(value) {
                 return JSON.stringify(value);

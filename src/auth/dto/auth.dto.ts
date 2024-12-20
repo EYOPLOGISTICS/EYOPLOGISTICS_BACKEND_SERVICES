@@ -68,13 +68,13 @@ export class SignUpDto {
     @MinLength(6)
     password: string;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
     city: string;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
     address: string;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
     location: MapDto;
 
 
