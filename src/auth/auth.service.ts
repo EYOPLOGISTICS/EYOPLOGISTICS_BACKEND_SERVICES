@@ -53,7 +53,6 @@ export class AuthService {
                 lat: '6.4302155',
                 lng: '3.5564407'
             }
-
         }
         if (address) user.address = address;
         if (city) user.city = city;
