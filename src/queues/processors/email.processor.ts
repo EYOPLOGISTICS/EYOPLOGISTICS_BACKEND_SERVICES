@@ -10,7 +10,7 @@ export class EmailProcessor{
         try {
             const context = job.data.data.context ? job.data.data.context : null
             const data = {
-                from: `OSR Cruise ${process.env.FROM}`,
+                from: `Eyop Store ${process.env.FROM}`,
                 to: job.data.data.to,
                 subject: job.data.data.subject,
                 template: job.data.data.template,
