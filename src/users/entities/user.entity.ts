@@ -69,7 +69,6 @@ export class User extends EyopBaseEntity {
     verified: boolean;
 
     @Column({
-        default:'"{\\"lat\\":\\"6.4302155\\",\\"lng\\":\\"3.5564407\\"}"',
         nullable: true, type: "json", transformer: {
             to(value) {
                 return JSON.stringify(value);

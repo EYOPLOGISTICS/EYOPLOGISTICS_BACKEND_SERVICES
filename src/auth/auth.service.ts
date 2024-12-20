@@ -9,6 +9,7 @@ import {Role} from "../enums/role.enum";
 import {User} from "../users/entities/user.entity";
 import {RatingsService} from "../ratings/ratings.service";
 import {ResetPasswordDto} from "../users/dto/create-user.dto";
+import {MapDto} from "../vendors/dto/create-vendor.dto";
 
 const bcrypt = require("bcrypt");
 
@@ -45,7 +46,15 @@ export class AuthService {
         user.phone_number = phone_number;
         user.first_name = first_name;
         user.last_name = last_name;
-        if (location) user.location = location;
+        if (location) {
+            user.location = location
+        } else {
+            user.location = {
+                lat: '6.4302155',
+                lng: '3.5564407'
+            }
+
+        }
         if (address) user.address = address;
         if (city) user.city = city;
         user.full_name = first_name + last_name;
