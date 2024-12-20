@@ -120,6 +120,9 @@ export class CartService {
         }
         cart.total_discount = discount;
         cart.total = total;
+        if(!cart.cart_products.length) {
+            cart.vendor_id = null
+        }
         await cart.save();
         return cart;
 
