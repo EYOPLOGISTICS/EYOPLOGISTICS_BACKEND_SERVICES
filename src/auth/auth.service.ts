@@ -17,22 +17,22 @@ export class AuthService {
     constructor(private otpService: OtpService, private usersService: UsersService, private jwtService: JwtService, private ratingService: RatingsService,) {
     }
 
-    async login(loginDto:LoginDto): Promise<any> {
+    async login(loginDto: LoginDto): Promise<any> {
         const {password, email} = loginDto;
         // find user with password
-        let user = await User.findOne({where:{email}, select:{id:true,password:true, email:true, verified:true}})
-        if(!user) returnErrorResponse('User does not exist');
+        let user = await User.findOne({where: {email}, select: {id: true, password: true, email: true, verified: true}})
+        if (!user) returnErrorResponse('User does not exist');
         // compare credentials
-        if(!await this.comparePassword(user.password, password)) returnErrorResponse('Invalid credentials')
+        if (!await this.comparePassword(user.password, password)) returnErrorResponse('Invalid credentials')
 
-        if(!user.verified) return successResponse({verified:user.verified, user:null, access_token:null})
+        if (!user.verified) return successResponse({verified: user.verified, user: null, access_token: null})
         // find user without password
-        user = await User.findOne({where:{email}})
+        user = await User.findOne({where: {email}})
 
         const payload = {sub: user.id, username: user.role};
         const access_token = await this.jwtService.signAsync(payload);
         console.log('logging endpoint successful')
-        return successResponse({user, access_token, verified:true});
+        return successResponse({user, access_token, verified: true});
 
     }
 
@@ -45,9 +45,9 @@ export class AuthService {
         user.phone_number = phone_number;
         user.first_name = first_name;
         user.last_name = last_name;
-        user.location = location;
-        user.address = address;
-        user.city = city;
+        if (location) user.location = location;
+        if (address) user.address = address;
+        if (city) user.city = city;
         user.full_name = first_name + last_name;
         user.role = role;
         user.password = await bcrypt.hash(password, 10);
@@ -57,7 +57,7 @@ export class AuthService {
     }
 
     async sendOtp(email: string) {
-       return await this.otpService.sendOtpToMail(email)
+        return await this.otpService.sendOtpToMail(email)
     }
 
     async verifyOtp(email: string, otp: number) {
@@ -72,10 +72,10 @@ export class AuthService {
 
     }
 
-    async resetPassword(resetPasswordDto:ResetPasswordDto){
-        const { confirm_password, new_password, email } = resetPasswordDto;
+    async resetPassword(resetPasswordDto: ResetPasswordDto) {
+        const {confirm_password, new_password, email} = resetPasswordDto;
         if (confirm_password !== new_password) returnErrorResponse("password dont match");
-        const user = await User.findOne({where:{email}, select:{id:true,email:true, password:true}})
+        const user = await User.findOne({where: {email}, select: {id: true, email: true, password: true}})
         if (!user) returnErrorResponse("User does not exist");
         user.password = await bcrypt.hash(new_password, 10);
         await user.save();
