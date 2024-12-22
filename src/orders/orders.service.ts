@@ -263,7 +263,7 @@ export class OrdersService {
             relations: {timelines: true, vendor: true, products: true, user: true},
             select: {
                 vendor: {name: true, id: true, verified: true, logo: true, owner_id:true, email:true},
-                user: {full_name: true, id: true, profile_picture: true, email:true}
+                user: {full_name: true, id: true, profile_picture: true, email:true, phone_number:true}
             },
             order: {timelines: {timeline: {order: 'ASC'}}}
         })
