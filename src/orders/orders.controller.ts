@@ -20,7 +20,7 @@ export class OrdersController {
     @Post('/checkout')
     async checkout(@Body() checkOutDto: CheckOutDto) {
         const {service_fee, total, km, delivery_fee, duration} = await this.ordersService.checkout(checkOutDto)
-        return successResponse({checkout_data:{service_fee, total, km, delivery_fee, duration}})
+        return successResponse({checkout_data: {service_fee, total, km, delivery_fee, duration}})
     }
 
     @Post()
@@ -29,38 +29,38 @@ export class OrdersController {
     }
 
     @Post('/ratings/:order_id')
-    rateOrder(@AuthUser() user:User, @Body() ratingDto:RateVendorDto, @Param('order_id') orderId: string){
+    rateOrder(@AuthUser() user: User, @Body() ratingDto: RateVendorDto, @Param('order_id') orderId: string) {
         return this.ratingService.create(user.id, orderId, ratingDto.star, ratingDto.review)
     }
 
     @Patch('/cancel/:order_id')
-    cancelOrder(@Param('order_id') orderId:string, @AuthUser() user: User) {
+    cancelOrder(@Param('order_id') orderId: string, @AuthUser() user: User) {
         return this.ordersService.cancelOrder(orderId, user);
     }
 
     @Patch('/complete/:order_id')
-    completeOrder(@Param('order_id') orderId:string, @AuthUser() user: User) {
+    completeOrder(@Param('order_id') orderId: string, @AuthUser() user: User) {
         return this.ordersService.completeOrder(orderId, user);
     }
 
     @Patch('/timelines/:timeline_id')
-    updateOrderTimeline(@Param('timeline_id') timelineId:string, @GetVendorId() vendorId:string) {
+    updateOrderTimeline(@Param('timeline_id') timelineId: string, @GetVendorId() vendorId: string) {
         return this.ordersService.updateOrderTimeline(timelineId, vendorId);
     }
 
     @Get('/customer')
-    customerOrders(@AuthUser() user:User, @Query() query:OrderSearchDto, @GetPagination() pagination:PaginationDto) {
+    customerOrders(@AuthUser() user: User, @Query() query: OrderSearchDto, @GetPagination() pagination: PaginationDto) {
         return this.ordersService.customerOrders(user, query, pagination);
     }
 
     @Get('/vendor')
-    vendorOrders(@GetVendorId() vendorId:string, @Query() query:OrderSearchDto, @GetPagination() pagination:PaginationDto) {
+    vendorOrders(@GetVendorId() vendorId: string, @Query() query: OrderSearchDto, @GetPagination() pagination: PaginationDto) {
         return this.ordersService.vendorsOrders(vendorId, query, pagination);
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.ordersService.findOne(id);
+    async findOne(@Param('id') id: string) {
+        return successResponse({order: await this.ordersService.findOrder(id)})
     }
 
 }
