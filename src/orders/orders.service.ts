@@ -27,6 +27,7 @@ import {BankAccount} from "../bank_accounts/entities/bank_account.entity";
 import {TransactionsService} from "../transactions/transactions.service";
 import {UseOneSignal} from "../services/one-signal";
 import {QueueService} from "../queues/queue.service";
+import {usePusher} from "../services/pusher";
 
 const {chargeCard} = usePaystackService;
 
@@ -279,6 +280,7 @@ export class OrdersService {
     }
 
     async updateOrderTimeline(orderTimelineId: string, vendorId: string) {
+        const pusher = usePusher();
         const orderTimeline = await OrderTimeline.findOne({where: {id: orderTimelineId}});
         if (!orderTimeline) returnErrorResponse('Timeline does not exist');
         let order = await this.findOrder(orderTimeline.order_id)
@@ -289,6 +291,7 @@ export class OrdersService {
         orderTimeline.status = !orderTimeline.status;
         await orderTimeline.save()
         order = await this.findOrder(orderTimeline.order_id)
+        await pusher.trigger(`order-track-${order.id}`, 'order-timeline-change', {order_id: order.id})
         return successResponse({order})
     }
 
