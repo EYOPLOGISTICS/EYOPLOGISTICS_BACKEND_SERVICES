@@ -7,7 +7,6 @@ import {successResponse} from "../utils/response";
 import {usePusher} from "../services/pusher";
 import {Activity} from "./entities/activity.entity";
 import {Role} from "../enums/role.enum";
-
 const pusher = usePusher();
 
 @Injectable()
