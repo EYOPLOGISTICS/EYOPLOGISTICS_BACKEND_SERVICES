@@ -99,6 +99,10 @@ export class ProductsService {
         return {products, total_rows: count}
     }
 
+    // async productStats(){
+    //     const totalProduct = await Product.count();
+    // }
+
     async viewProduct(data: string): Promise<any> {
         const product = await Product.findOne({
             where: {slug: data},

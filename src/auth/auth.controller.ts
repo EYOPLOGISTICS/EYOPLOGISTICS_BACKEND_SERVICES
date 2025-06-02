@@ -40,6 +40,12 @@ export class AuthController {
     }
 
     @Public()
+    @Post("/admin/login")
+    adminSignIn(@Body() loginDto: LoginDto) {
+        return this.authService.adminLogin(loginDto);
+    }
+
+    @Public()
     @Post("login")
     signIn(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);

@@ -1,18 +1,16 @@
-import {HttpStatus, Injectable} from "@nestjs/common";
-import {UsersService} from "../users/users.service";
-import {returnErrorResponse, successResponse} from "../utils/response";
-import {JwtService} from "@nestjs/jwt";
-import {OtpService} from "../otp/otp.service";
-import {LoginDto, SignUpDto} from "./dto/auth.dto";
-import {DOMAIN_TYPE} from "../enums/type.enum";
-import {Role} from "../enums/role.enum";
-import {User} from "../users/entities/user.entity";
-import {RatingsService} from "../ratings/ratings.service";
-import {ResetPasswordDto} from "../users/dto/create-user.dto";
-import {MapDto} from "../vendors/dto/create-vendor.dto";
-import {QueueService} from "../queues/queue.service";
+import { Injectable } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
+import { returnErrorResponse, successResponse } from '../utils/response';
+import { JwtService } from '@nestjs/jwt';
+import { OtpService } from '../otp/otp.service';
+import { LoginDto, SignUpDto } from './dto/auth.dto';
+import { Role } from '../enums/role.enum';
+import { User } from '../users/entities/user.entity';
+import { RatingsService } from '../ratings/ratings.service';
+import { ResetPasswordDto } from '../users/dto/create-user.dto';
+import { QueueService } from '../queues/queue.service';
 
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 
 @Injectable()
 export class AuthService {
@@ -34,6 +32,23 @@ export class AuthService {
         const payload = {sub: user.id, username: user.role};
         const access_token = await this.jwtService.signAsync(payload);
         console.log('logging endpoint successful')
+        return successResponse({user, access_token, verified: true});
+
+    }
+
+    async adminLogin(loginDto: LoginDto): Promise<any> {
+        const {password, email} = loginDto;
+        // find user with password
+        let user = await User.findOne({where: {email}, select: {id: true, password: true, email: true, verified: true, role:true}})
+        if (!user) returnErrorResponse('User does not exist');
+        // compare credentials
+        if (!await this.comparePassword(user.password, password)) returnErrorResponse('Invalid credentials')
+        if(user.role != Role.ADMIN) returnErrorResponse('Unauthorized');
+        user = await User.findOne({where: {email}})
+
+        const payload = {sub: user.id, username: user.role};
+        const access_token = await this.jwtService.signAsync(payload);
+        console.log('logging endpoint successful admin')
         return successResponse({user, access_token, verified: true});
 
     }

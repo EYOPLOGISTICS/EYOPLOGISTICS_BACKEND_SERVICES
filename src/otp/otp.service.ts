@@ -19,6 +19,8 @@ export class OtpService {
         return true;
     }
 
+
+
     async sendOtpToMailAndPhoneNumber(email: string, phone_number:string) {
         const otpData = await this.generateOtp(email, phone_number);
         await this.queueService.sendMail({
