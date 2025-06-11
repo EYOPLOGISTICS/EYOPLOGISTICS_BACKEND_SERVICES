@@ -271,7 +271,10 @@ export class VendorsService {
       location,
       description,
       vendor_category_id,
+      vendor_id
     } = updateVendorDto;
+
+    vendorId = vendorId || vendor_id;
     // vendor category
     const vendorCategory = await VendorCategory.findOne({
       where: { id: vendor_category_id },
@@ -285,12 +288,14 @@ export class VendorsService {
     if (anotherVendorWithEmailExists)
       returnErrorResponse('A vendor with that email already exists');
     // ensure a different vendor does not have this phone number
-    const anotherVendorWithPhoneExists = await Vendor.findOne({
-      where: { phone_number, owner_id: Not(owner.id) },
-      select: { id: true, phone_number: true, owner_id: true },
-    });
-    if (anotherVendorWithPhoneExists)
-      returnErrorResponse('A vendor with that email already exists');
+   if (owner.role != Role.ADMIN){
+     const anotherVendorWithPhoneExists = await Vendor.findOne({
+       where: { phone_number, owner_id: Not(owner.id) },
+       select: { id: true, phone_number: true, owner_id: true },
+     });
+     if (anotherVendorWithPhoneExists)
+       returnErrorResponse('A vendor with that email already exists');
+   }
     const mapServices = useGoogleMapServices();
     const { state, address, country } = await mapServices.getStateFromLatAndLng(
       mapServices.formatLatAndLng(location.lat, location.lng),

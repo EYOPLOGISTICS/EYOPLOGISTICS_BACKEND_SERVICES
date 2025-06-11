@@ -11,6 +11,8 @@ export class MapDto {
 }
 export class CreateVendorDto {
 
+    vendor_id: string
+
     @IsNotEmpty()
     name: string
 
