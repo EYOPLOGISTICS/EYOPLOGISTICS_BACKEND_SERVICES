@@ -21,6 +21,25 @@ export class CategoryService {
         await vendorCategory.save();
         return successResponse({vendor_category:vendorCategory, message: 'vendor category created successfully'})
     }
+
+    async editVendorCategory(id:string, createVendorCategoryDto: CreateVendorCategoryDto) {
+        const {name, image} = createVendorCategoryDto;
+        const slug = useSlugify(name)
+        const vendorCategory = await VendorCategory.findOne({where:{id}});
+        if (!vendorCategory) returnErrorResponse('vendor category does exists')
+        vendorCategory.name = name;
+        vendorCategory.image = image;
+        vendorCategory.slug = slug;
+        await vendorCategory.save();
+        return successResponse({vendor_category:vendorCategory, message: 'vendor category updated successfully'})
+    }
+
+    async deleteVendorCategory(id:string) {
+        const vendorCategory = await VendorCategory.findOne({where:{id}});
+        if (!vendorCategory) returnErrorResponse('vendor category does exists')
+        await vendorCategory.softRemove()
+        return successResponse("deleted successfully")
+    }
     async create(createCategoryDto: CreateCategoryDto) {
         const {name, image} = createCategoryDto;
         const slug = useSlugify(name)

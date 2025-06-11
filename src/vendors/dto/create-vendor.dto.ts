@@ -10,6 +10,7 @@ export class MapDto {
     lng: string;
 }
 export class CreateVendorDto {
+
     @IsNotEmpty()
     name: string
 
