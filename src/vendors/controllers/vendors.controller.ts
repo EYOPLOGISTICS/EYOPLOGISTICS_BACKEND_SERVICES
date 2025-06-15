@@ -62,7 +62,7 @@ export class VendorsController {
 
     @Get('/products')
     products(@Query()searchProductDto: SearchProductsDto, @AuthUser() owner: User, @GetVendorId() vendorId: string, @GetPagination() pagination: PaginationDto) {
-        return this.vendorsService.products(searchProductDto, vendorId, pagination);
+        return this.vendorsService.products(owner,searchProductDto, vendorId, pagination);
     }
 
     @Get('/products/:product_id')

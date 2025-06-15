@@ -2,7 +2,7 @@ import {Controller, Get, Post, Body, Patch, Param, Delete, Query} from '@nestjs/
 import {ProductsService} from '../services/products.service';
 import {CreateProductDto, SearchProductsDto} from '../dto/create-product.dto';
 import {UpdateProductDto} from '../dto/update-product.dto';
-import {GetVendor} from "../../decorators/vendor.decorator";
+import { GetVendor, GetVendorId } from '../../decorators/vendor.decorator';
 import {Vendor} from "../../vendors/entities/vendor.entity";
 import {AuthUser} from "../../decorators/user.decorator";
 import {User} from "../../users/entities/user.entity";
@@ -20,8 +20,8 @@ export class ProductsController {
     // }
 
     @Get()
-    async products(@Query() searchProductsDto: SearchProductsDto, @GetPagination() pagination: PaginationDto) {
-        return successResponse(await this.productsService.products(searchProductsDto, pagination))
+    async products(@AuthUser() user:User, @Query() searchProductsDto: SearchProductsDto, @GetPagination() pagination: PaginationDto) {
+        return successResponse(await this.productsService.products(user,searchProductsDto, pagination))
     }
 
     @Get(':product_slug')
@@ -33,6 +33,11 @@ export class ProductsController {
     // update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     //     return this.productsService.update(id, updateProductDto);
     // }
+
+    @Delete('/products/:product_id')
+    removeProduct(@Param('product_id') productId: string, @AuthUser() remover: User, @GetVendorId() vendor: string) {
+        return this.productsService.remove(productId, vendor, remover);
+    }
 
 
 }

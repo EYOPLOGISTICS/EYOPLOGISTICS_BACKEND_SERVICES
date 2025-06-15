@@ -73,4 +73,18 @@ export class CategoryService {
         return successResponse({categories: categories})
     }
 
+    async deleteCategory(id:string) {
+        const category = await Category.findOne({where: {id}});
+        if (!category) returnErrorResponse('category does not exists')
+        await category.softRemove()
+        return successResponse("category deleted successfully")
+    }
+
+    async deleteSubCategory(id:string) {
+        const category = await SubCategory.findOne({where: {id}});
+        if (!category) returnErrorResponse('category does not exists')
+        await category.softRemove()
+        return successResponse("sub category deleted successfully")
+    }
+
 }

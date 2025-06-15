@@ -17,6 +17,15 @@ export class OrdersController {
     constructor(private readonly ordersService: OrdersService, private ratingService: RatingsService) {
     }
 
+    @Get("/all")
+    orders(@AuthUser() user: User, @Query() query: OrderSearchDto, @GetPagination() pagination: PaginationDto){
+        return this.ordersService.allOrders(user, query, pagination);
+    }
+
+    @Get("/:orderId")
+    viewOrder(@Param("orderId") orderId: string) {
+        return this.ordersService.viewOrder(orderId);
+    }
     @Post('/checkout')
     async checkout(@Body() checkOutDto: CheckOutDto) {
         const {service_fee, total, km, delivery_fee, duration} = await this.ordersService.checkout(checkOutDto)

@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CACDto,
-  CreateVendorDto,
-  VendorSearchDto,
-} from '../dto/create-vendor.dto';
+import { CACDto, CreateVendorDto, VendorSearchDto } from '../dto/create-vendor.dto';
 import { UpdateVendorDto } from '../dto/update-vendor.dto';
 import { useGoogleMapServices } from '../../services/map';
 import { Vendor } from '../entities/vendor.entity';
@@ -11,10 +7,7 @@ import { returnErrorResponse, successResponse } from '../../utils/response';
 import { User } from '../../users/entities/user.entity';
 import { DataSource, Not } from 'typeorm';
 import { VendorCategory } from '../entities/category.entity';
-import {
-  CreateProductDto,
-  SearchProductsDto,
-} from '../../products/dto/create-product.dto';
+import { CreateProductDto, SearchProductsDto } from '../../products/dto/create-product.dto';
 import { PaginationDto } from '../../decorators/pagination-decorator';
 import { ProductsService } from '../../products/services/products.service';
 import { Product } from '../../products/entities/product.entity';
@@ -24,6 +17,7 @@ import { Order } from '../../orders/entities/order.entity';
 import { ORDER_STATUS } from '../../enums/type.enum';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { Role } from '../../enums/role.enum';
+import { AuthUser } from '../../decorators/user.decorator';
 
 @Injectable()
 export class VendorsService {
@@ -150,22 +144,41 @@ export class VendorsService {
       description: true,
     };
 
-    const [vendors, count] = await Vendor.findAndCount({
-      where: conditions,
-      take: pagination.limit,
-      skip: pagination.offset,
-      select,
-    });
-    for (const vendor of vendors) {
-      vendor['ratings'] = await Rating.find({
-        where: { vendor_id: vendor.id },
-        take: 1,
-        order: { created_at: 'DESC' },
-        relations: { user: true },
-        select: { user: { full_name: true, profile_picture: true, id: true } },
-      });
-    }
-    return successResponse({ vendors, total_rows: count });
+   if (viewer.role === Role.ADMIN){
+     const [vendors, count] = await Vendor.findAndCount({
+       where: conditions,
+       take: pagination.limit,
+       skip: pagination.offset,
+       select,
+     });
+     for (const vendor of vendors) {
+       vendor['ratings'] = await Rating.find({
+         where: { vendor_id: vendor.id },
+         take: 1,
+         order: { created_at: 'DESC' },
+         relations: { user: true },
+         select: { user: { full_name: true, profile_picture: true, id: true } },
+       });
+     }
+     return successResponse({ vendors, total_rows: count });
+   } else{
+     const [vendors, count] = await Vendor.findAndCount({
+       where: conditions,
+       take: pagination.limit,
+       skip: pagination.offset,
+       select,
+     });
+     for (const vendor of vendors) {
+       vendor['ratings'] = await Rating.find({
+         where: { vendor_id: vendor.id },
+         take: 1,
+         order: { created_at: 'DESC' },
+         relations: { user: true },
+         select: { user: { full_name: true, profile_picture: true, id: true } },
+       });
+     }
+     return successResponse({ vendors, total_rows: count });
+   }
   }
 
   async vendorsOwner(viewer: User) {
@@ -174,12 +187,13 @@ export class VendorsService {
   }
 
   async products(
+    @AuthUser() user:User,
     searchProductDto: SearchProductsDto,
     vendorId: string,
     pagination: PaginationDto,
   ) {
     searchProductDto.vendor = vendorId;
-    const { products, total_rows } = await this.productService.products(
+    const { products, total_rows } = await this.productService.products(user,
       searchProductDto,
       pagination,
     );
@@ -249,7 +263,7 @@ export class VendorsService {
   }
 
   async removeProduct(productId: string, vendor: string, remover: User) {
-    const product = await this.productService.remove(productId, vendor);
+    const product = await this.productService.remove(productId, vendor, remover);
     await this.notificationService.createActivity(
       `${remover.full_name} deleted a product(${product.name})`,
       remover.id,

@@ -42,6 +42,11 @@ export class CategoriesController {
     return this.categoryService.createSubCategory(createSubCategoryDto);
   }
 
+  @Delete('sub-categories/:id')
+  removeSubCat(@Param('id') id: string) {
+    return this.categoryService.deleteCategory(id);
+  }
+
   @Get('vendor-categories')
   getVendorCategories() {
     return this.categoryService.vendorCategories();
@@ -57,8 +62,8 @@ export class CategoriesController {
   //     return this.categoryService.update(+id, updateProductDto);
   // }
   //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //     return this.categoryService.remove(id);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+      return this.categoryService.deleteCategory(id);
+  }
 }
