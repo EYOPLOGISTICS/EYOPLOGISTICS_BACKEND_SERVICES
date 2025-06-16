@@ -21,6 +21,7 @@ import {ErrorResponseType, SuccessResponseType} from "../enums/type.enum";
 import {AuthUser} from "../decorators/user.decorator";
 import {User} from "./entities/user.entity";
 import {ChangePassword} from "./dto/create-user.dto";
+import { GetPagination, PaginationDto } from '../decorators/pagination-decorator';
 
 @ApiTags("User")
 @Controller("users")
@@ -28,11 +29,18 @@ export class UsersController {
     constructor(private readonly usersService: UsersService) {
     }
 
+    @Get()
+    getUsers(@AuthUser() user: User, @GetPagination() pagination: PaginationDto) {
+        return this.usersService.getUsers(user, pagination);
+    }
+
 
     @Get('/cards')
     getUserCards(@AuthUser() user: User) {
         return this.usersService.getUserCards(user);
     }
+
+
 
 
     @Get(":id")
