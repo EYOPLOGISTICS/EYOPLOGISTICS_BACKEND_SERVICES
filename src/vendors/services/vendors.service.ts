@@ -143,6 +143,8 @@ export class VendorsService {
       rating_count: true,
       address:true,
       description: true,
+      is_active:true,
+      cac:true
     };
 
    if (viewer.role === Role.ADMIN){
