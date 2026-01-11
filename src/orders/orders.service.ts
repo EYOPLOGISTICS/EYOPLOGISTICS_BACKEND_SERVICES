@@ -470,7 +470,7 @@ export class OrdersService {
       skip: pagination.offset,
       take: pagination.limit,
     });
-    return successResponse({ orders, total_rows: count });
+    return successResponse({ orders, total_rows: count, totalCancelledOrders, totalFailedOrders, totalCompletedOrders });
   }
 
   async viewOrder(orderId: string) {
