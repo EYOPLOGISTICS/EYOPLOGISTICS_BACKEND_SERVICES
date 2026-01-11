@@ -22,10 +22,6 @@ export class OrdersController {
         return this.ordersService.allOrders(user, query, pagination);
     }
 
-    @Get("/:orderId")
-    viewOrder(@Param("orderId") orderId: string) {
-        return this.ordersService.viewOrder(orderId);
-    }
     @Post('/checkout')
     async checkout(@Body() checkOutDto: CheckOutDto) {
         const {service_fee, total, km, delivery_fee, duration} = await this.ordersService.checkout(checkOutDto)
@@ -67,9 +63,15 @@ export class OrdersController {
         return this.ordersService.vendorsOrders(vendorId, query, pagination);
     }
 
+    @Get("/:orderId")
+    viewOrder(@Param("orderId") orderId: string) {
+        return this.ordersService.viewOrder(orderId);
+    }
+
     @Get(':id')
     async findOne(@Param('id') id: string) {
         return successResponse({order: await this.ordersService.findOrder(id)})
     }
+
 
 }
