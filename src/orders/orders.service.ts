@@ -14,7 +14,6 @@ import {
   PAYMENT_METHOD,
   PAYMENT_STATUS,
   SHIPPING_METHOD,
-  STATUS,
   TRANSACTION_METHOD,
   TRANSACTION_TYPE,
 } from '../enums/type.enum';
@@ -32,6 +31,7 @@ import { TransactionsService } from '../transactions/transactions.service';
 import { UseOneSignal } from '../services/one-signal';
 import { QueueService } from '../queues/queue.service';
 import { usePusher } from '../services/pusher';
+import { Transaction } from '../transactions/entities/transaction.entity';
 
 const { chargeCard } = usePaystackService;
 
@@ -320,6 +320,11 @@ export class OrdersService {
       where: { id: order.vendor_id },
       select: { balance: true, id: true },
     });
+    const transExist = await Transaction.findOne({
+      where: { order_id: order.id },
+    });
+    if (transExist) return;
+
     const bankAccount = await BankAccount.findOne({
       where: { vendor_id: vendor.id },
     });
@@ -330,6 +335,7 @@ export class OrdersService {
     await this.transactionService.create({
       method: TRANSACTION_METHOD.TRANSFER,
       user_id: vendor.id,
+      order_id: order.id,
       amount: order.cart_total,
       transfer_id: transferResponse.id,
       status: transferResponse.status,
@@ -442,6 +448,11 @@ export class OrdersService {
         conditions['status'] = status;
       }
     }
+
+    const totalCompletedOrders = await Order.count({where:{status:ORDER_STATUS.COMPLETED}})
+    const totalCancelledOrders = await Order.count({where:{status:ORDER_STATUS.CANCELLED}})
+    const totalFailedOrders = await Order.count({where:{status:ORDER_STATUS.FAILED}})
+
     const [orders, count] = await Order.findAndCount({
       relations: {
         timelines: true,
@@ -475,7 +486,7 @@ export class OrdersService {
         vendor: { name: true, id: true, verified: true, logo: true },
         user: { full_name: true, id: true, profile_picture: true },
       },
-      where: {id:orderId},
+      where: { id: orderId },
     });
     if (!order) returnErrorResponse('Order does not exist');
     return successResponse({ order });

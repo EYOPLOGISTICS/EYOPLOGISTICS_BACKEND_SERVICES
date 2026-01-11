@@ -16,6 +16,7 @@ export class CreateTransactionDto {
   title:string
 
   amount:number
+  order_id?:string
 
 }
 

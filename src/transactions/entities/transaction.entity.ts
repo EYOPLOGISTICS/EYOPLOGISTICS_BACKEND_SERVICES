@@ -18,6 +18,9 @@ export class Transaction extends EyopBaseEntity {
     amount: number;
 
     @Column({nullable: true})
+    order_id: string;
+
+    @Column({nullable: true})
     title: string;
 
     @Column({nullable: true})

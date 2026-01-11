@@ -11,6 +11,7 @@ import { SuccessResponseType } from "../enums/type.enum";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { successResponse } from "../utils/response";
 import { Public } from "../decorators/public-endpoint.decorator";
+import { GetPagination, PaginationDto } from '../decorators/pagination-decorator';
 
 @ApiTags("Transactions")
 @Controller("transactions")
@@ -25,8 +26,8 @@ export class TransactionsController {
     description: "returns transactions list"
   })
   @Get()
-  async findAll(@AuthUser() user: User): Promise<SuccessResponseType> {
-    return successResponse(await this.transactionsService.findAll(user));
+  async findAll(@AuthUser() user: User, @GetPagination() pagination:PaginationDto): Promise<SuccessResponseType> {
+    return successResponse(await this.transactionsService.findAll(user, pagination));
   }
 
   @ApiOperation({ summary: "Verify transaction/payment" })
