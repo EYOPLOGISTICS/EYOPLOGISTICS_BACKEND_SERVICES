@@ -44,7 +44,7 @@ export class CategoriesController {
 
   @Delete('sub-categories/:id')
   removeSubCat(@Param('id') id: string) {
-    return this.categoryService.deleteCategory(id);
+    return this.categoryService.deleteSubCategory(id);
   }
 
   @Get('vendor-categories')
