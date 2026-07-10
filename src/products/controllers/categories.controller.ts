@@ -37,6 +37,16 @@ export class CategoriesController {
     return this.categoryService.create(createCategoryDto);
   }
 
+  @Patch("/:id")
+  update(@Param("id") id:string, @Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.updateCat(id,createCategoryDto);
+  }
+
+  @Patch("/sub-categories/:id")
+  updateSubCat(@Param("id") id:string, @Body() createCategoryDto: CreateSubCategoryDto) {
+    return this.categoryService.updateSubCat(id,createCategoryDto);
+  }
+
   @Post('/sub-categories')
   createSubcategory(@Body() createSubCategoryDto: CreateSubCategoryDto) {
     return this.categoryService.createSubCategory(createSubCategoryDto);
