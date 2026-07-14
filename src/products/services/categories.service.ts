@@ -97,8 +97,8 @@ export class CategoryService {
     if (!category) returnErrorResponse('Sub Category does not exist');
     const slug = useSlugify(name);
 
-    if (await SubCategory.findOne({ where: { slug, id: Not(category.id) } }))
-      returnErrorResponse('Sub Category name already exists');
+    if (await SubCategory.findOne({ where: { slug, id: Not(category.id), category_id } }))
+      returnErrorResponse('Sub Category already exists for same category');
 
     category.name = name;
     category.image = image;
@@ -114,8 +114,8 @@ export class CategoryService {
   async createSubCategory(createSubCategoryDto: CreateSubCategoryDto) {
     const { name, image, category_id } = createSubCategoryDto;
     const slug = useSlugify(name);
-    if (await SubCategory.findOne({ where: { slug } }))
-      returnErrorResponse('sub category already exists');
+    if (await SubCategory.findOne({ where: { slug, category_id } }))
+      returnErrorResponse('sub category already exists for that category');
     const subCategory = new SubCategory();
     subCategory.name = name;
     subCategory.image = image;
@@ -149,6 +149,8 @@ export class CategoryService {
     await category.softRemove();
     return successResponse('category deleted successfully');
   }
+
+
 
   async deleteSubCategory(id: string) {
     const category = await SubCategory.findOne({ where: { id } });
