@@ -76,6 +76,12 @@ export class Vendor extends EyopBaseEntity {
 
     ellipse_address:string
 
+    @Column({ nullable: true })
+    paystack_subaccount_code: string;
+
+    @Column({ nullable: true })
+    paystack_subaccount_id: number;
+
     @ManyToOne(() => User, (owner) =>owner, {
         onDelete:'CASCADE',
     })

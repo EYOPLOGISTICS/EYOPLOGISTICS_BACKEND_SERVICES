@@ -138,6 +138,45 @@ export const generateTrackingCode = () => {
         .random() * (max - min + 1)) + min;
 }
 
+
+export const getCheckoutFees = (
+  productAmount: number,
+  buyerTransactionFee = 100,
+  vendorCommissionPercentage = 5,
+) => {
+    // Vendor commission
+    const vendorCommission =
+      (vendorCommissionPercentage / 100) * productAmount;
+
+    // Platform amount to retain
+    const transactionCharge =
+      buyerTransactionFee + vendorCommission;
+
+    // Customer amount before Paystack fee
+    const subtotal =
+      productAmount + buyerTransactionFee;
+
+    // Calculate Paystack fee
+    const decimalFee = 1.5 / 100;
+    let paystackFee = subtotal * decimalFee;
+    let paystackAmount = 0;
+
+    if (paystackFee > 2000) {
+        paystackFee = 2000;
+        paystackAmount = subtotal + paystackFee;
+    } else {
+        paystackAmount = subtotal / (1 - decimalFee) + 0.01;
+    }
+
+    return {
+        buyer_fee: buyerTransactionFee,
+        vendor_commission: vendorCommission,
+        transaction_charge: transactionCharge,
+        paystack_fee: paystackFee,
+        paystack_amount: Math.round(paystackAmount),
+    };
+};
+
 export const getPaystackFee = (amount): { applicable_fee: number, paystack_amount: number } => {
     const decimal_fee = 1.5 / 100;
     const applicableFee = decimal_fee * amount;

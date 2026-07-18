@@ -231,7 +231,10 @@ export class TransactionsService {
       initializeTransactionDto.email,
       initializeTransactionDto.amount,
       initializeTransactionDto.metadata,
+      initializeTransactionDto.subaccount_code,
+      initializeTransactionDto.transfer_charge,
       initializeTransactionDto.payment_channels,
+
     );
     return successResponse({ access_code: data });
   }

@@ -39,6 +39,9 @@ export class InitializeTransactionDto {
 
   payment_channels:Array<any>
 
+  subaccount_code:string
+  transfer_charge?:number
+
 }
 
 export class InitializeStripeTransactionDto {

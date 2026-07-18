@@ -24,6 +24,18 @@ export class Order extends EyopBaseEntity{
     @Column({nullable:true})
     card_id:string
 
+    @Column({nullable:true})
+    paystack_fee:number
+
+    @Column({nullable:true})
+    buyer_fee:number
+
+    @Column({nullable:true})
+    vendor_commission:number
+
+    @Column({nullable:true})
+    transaction_charge:number
+
     @Column({nullable:false})
     payment_method:PAYMENT_METHOD
 
