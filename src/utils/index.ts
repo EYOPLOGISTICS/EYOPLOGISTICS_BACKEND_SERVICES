@@ -171,7 +171,7 @@ export const getCheckoutFees = (
     return {
         buyer_fee: buyerTransactionFee,
         vendor_commission: vendorCommission,
-        transaction_charge: transactionCharge,
+        transaction_charge: transactionCharge + paystackFee,
         paystack_fee: paystackFee,
         paystack_amount: Math.round(paystackAmount),
     };
