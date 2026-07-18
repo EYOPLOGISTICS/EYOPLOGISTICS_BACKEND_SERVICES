@@ -150,6 +150,7 @@ export class OrdersService {
         order.km = km;
         order.duration = duration ?? '0';
         order.discount = cart.total_discount;
+        order.service_fee = paystack_fee;
         await manager.save(order);
 
         await manager.delete(OrderProduct, { order_id: order.id });
