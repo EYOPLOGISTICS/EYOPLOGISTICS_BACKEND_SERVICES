@@ -51,6 +51,7 @@ import { OrdersModule } from './orders/orders.module';
     QueueModule,
     UsersModule,
     AuthModule,
+    OrdersModule,
     TransactionsModule,
     NotificationsModule,
     SchedulerModule,
@@ -58,7 +59,6 @@ import { OrdersModule } from './orders/orders.module';
     ProductsModule,
     BankAccountsModule,
     CartModule,
-    OrdersModule,
   ],
   controllers:[AppController],
   providers: [AppService,{

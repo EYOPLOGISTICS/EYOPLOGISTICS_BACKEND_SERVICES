@@ -46,7 +46,6 @@ const { chargeCard } = usePaystackService;
 @Injectable()
 export class OrdersService {
   constructor(
-    private transactionService: TransactionsService,
     private queueService: QueueService,
     private dataSource: DataSource,
   ) {}
@@ -409,35 +408,35 @@ export class OrdersService {
     return successResponse({ order });
   }
 
-  async processVendorEarning(order: Order) {
-    const vendor = await Vendor.findOne({
-      where: { id: order.vendor_id },
-      select: { balance: true, id: true },
-    });
-    const transExist = await Transaction.findOne({
-      where: { order_id: order.id },
-    });
-    if (transExist) return;
-
-    const bankAccount = await BankAccount.findOne({
-      where: { vendor_id: vendor.id },
-    });
-    const transferResponse = await usePaystackService.initiateTransfer(
-      order.cart_total,
-      bankAccount.recipient_code,
-    );
-    await this.transactionService.create({
-      method: TRANSACTION_METHOD.TRANSFER,
-      user_id: vendor.id,
-      order_id: order.id,
-      amount: order.cart_total,
-      transfer_id: transferResponse.id,
-      status: transferResponse.status,
-      title: `Order Payout to ${bankAccount.account_name}`,
-      type: TRANSACTION_TYPE.TRANSFER,
-      payment_reference: transferResponse.reference,
-    });
-  }
+  // async processVendorEarning(order: Order) {
+  //   const vendor = await Vendor.findOne({
+  //     where: { id: order.vendor_id },
+  //     select: { balance: true, id: true },
+  //   });
+  //   const transExist = await Transaction.findOne({
+  //     where: { order_id: order.id },
+  //   });
+  //   if (transExist) return;
+  //
+  //   const bankAccount = await BankAccount.findOne({
+  //     where: { vendor_id: vendor.id },
+  //   });
+  //   const transferResponse = await usePaystackService.initiateTransfer(
+  //     order.cart_total,
+  //     bankAccount.recipient_code,
+  //   );
+  //   await this.transactionService.create({
+  //     method: TRANSACTION_METHOD.TRANSFER,
+  //     user_id: vendor.id,
+  //     order_id: order.id,
+  //     amount: order.cart_total,
+  //     transfer_id: transferResponse.id,
+  //     status: transferResponse.status,
+  //     title: `Order Payout to ${bankAccount.account_name}`,
+  //     type: TRANSACTION_TYPE.TRANSFER,
+  //     payment_reference: transferResponse.reference,
+  //   });
+  // }
 
   async findOrder(orderId: string): Promise<Order | undefined> {
     return await Order.findOne({

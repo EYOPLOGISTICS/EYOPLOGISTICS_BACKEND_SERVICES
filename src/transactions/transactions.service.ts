@@ -5,9 +5,9 @@ import {
   InitializeTransactionDto,
   VerifyTransactionDto,
 } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction } from './entities/transaction.entity';
 import {
+  PAYMENT_STATUS,
   PAYSTACK_WEBHOOK_EVENTS,
   STATUS,
   SuccessResponseType,
@@ -21,11 +21,11 @@ import { Card } from '../cards/entities/card.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { usePusher } from '../services/pusher';
 import usePaystackService from '../services/paystack';
-import { getPaystackFee, SUPPORTED_COUNTRIES } from '../utils';
 import { useStripePaymentGateway } from '../services/stripe';
-import { UseOneSignal } from '../services/one-signal';
 import { PaginationDto } from '../decorators/pagination-decorator';
 import { Role } from '../enums/role.enum';
+import { Order } from '../orders/entities/order.entity';
+import { OrdersService } from '../orders/orders.service';
 
 const { verifyTransaction, initializeTransaction } = usePaystackService;
 
@@ -35,6 +35,8 @@ const pusher = usePusher();
 export class TransactionsService {
   constructor(
     @Inject(forwardRef(() => UsersService)) private userService: UsersService,
+    @Inject(forwardRef(() => OrdersService))
+    private readonly orderService: OrdersService,
     private notificationsService: NotificationsService,
   ) {}
 
@@ -72,10 +74,7 @@ export class TransactionsService {
     return transaction;
   }
 
-  async findAll(
-    user: User,
-    pagination: PaginationDto,
-  ): Promise<any> {
+  async findAll(user: User, pagination: PaginationDto): Promise<any> {
     if (user.role === Role.ADMIN) {
       const [transactions, count] = await Transaction.findAndCount({
         order: {
@@ -84,7 +83,7 @@ export class TransactionsService {
         skip: pagination.offset,
         take: pagination.limit,
       });
-      return {transactions, totalRows:count};
+      return { transactions, totalRows: count };
     } else {
       return await Transaction.find({
         order: {
@@ -104,12 +103,23 @@ export class TransactionsService {
     }
   }
 
-  webhookServiceHandler(payload: any): void {
+  async webhookServiceHandler(payload: any) {
     if (payload.event === PAYSTACK_WEBHOOK_EVENTS.CHARGE_SUCCESS) {
       switch (payload.data.metadata.transaction_type) {
         case 'wallet_funding':
           this.fundWallet(payload.data);
           break;
+        case 'order.pay':
+          const orderId = payload.data.metadata.order_id;
+          if (orderId) {
+            const order = await Order.findOne({ where: { id: orderId } });
+            if (order && order.payment_status != PAYMENT_STATUS.PAID) {
+              console.log('Processing order via webhook');
+              order.payment_status = PAYMENT_STATUS.PAID;
+              await order.save();
+              await this.orderService.processOrder(order);
+            }
+          }
       }
     }
 
@@ -234,7 +244,6 @@ export class TransactionsService {
       initializeTransactionDto.subaccount_code,
       initializeTransactionDto.transfer_charge,
       initializeTransactionDto.payment_channels,
-
     );
     return successResponse({ access_code: data });
   }

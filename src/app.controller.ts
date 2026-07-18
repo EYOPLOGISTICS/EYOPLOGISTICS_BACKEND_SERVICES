@@ -78,13 +78,11 @@ export class AppController {
 
   @Public()
   @Post('/paystack/webhook')
-  webHookHandler(@Res() res, @Req() req) {
+  async webHookHandler(@Res() res, @Req() req) {
     const body = req.body;
-    logger.error(JSON.stringify(body));
-    logger.error(`first webhook`);
+    console.log("received webhook",JSON.stringify(body));
     if (authenticate(body, req.headers['x-paystack-signature'])) {
       console.log('authenticated');
-      logger.error(`webhook data ${JSON.stringify(body)}`);
       this.transactionService.webhookServiceHandler(body);
     } else {
       console.log('not authenticated');
