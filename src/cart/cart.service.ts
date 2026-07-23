@@ -67,6 +67,7 @@ export class CartService {
       console.log('done adding product');
     }
 
+    console.log("About to recalculate");
     await this.recalculateCartTotals(cart.id);
 
     return successResponse({ cart: await this.getCartFull(cart.id) });
