@@ -1,5 +1,5 @@
 import {EyopBaseEntity} from "../../abstract/osr-base-entity";
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany} from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import {ORDER_STATUS, ORDER_TIMELINE, PAYMENT_METHOD, PAYMENT_STATUS, SHIPPING_METHOD} from "../../enums/type.enum";
 import {MapDto} from "../../vendors/dto/create-vendor.dto";
 import {OrderProduct} from "./order-products.entity";
@@ -20,6 +20,8 @@ export class Order extends EyopBaseEntity{
 
     @Column({nullable:false})
     vendor_id:string
+
+    paid_at: Date;
 
     @Column({nullable:true})
     card_id:string

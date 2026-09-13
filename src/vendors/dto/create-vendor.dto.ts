@@ -39,6 +39,8 @@ export class CreateVendorDto {
 export class CACDto {
     @IsNotEmpty()
     cac_number: string;
+
+    verification_type: string;
 }
 
 export class VendorSearchDto extends PaginationDto{

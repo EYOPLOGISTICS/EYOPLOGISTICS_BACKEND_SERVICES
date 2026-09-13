@@ -9,6 +9,7 @@ export class Vendor extends EyopBaseEntity {
     @Column({nullable: false})
     name: string
 
+
     @Column({nullable: false})
     vendor_category_id: string
 
@@ -64,6 +65,9 @@ export class Vendor extends EyopBaseEntity {
 
     @Column({nullable: true})
     cac: string
+
+    @Column({nullable: true})
+    verification_type: string
 
     @Column({nullable: false, default:false})
     verified: boolean

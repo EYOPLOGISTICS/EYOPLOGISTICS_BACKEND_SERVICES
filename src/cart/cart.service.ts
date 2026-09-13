@@ -67,7 +67,7 @@ export class CartService {
       console.log('done adding product');
     }
 
-    console.log("About to recalculate");
+    console.log('About to recalculate');
     await this.recalculateCartTotals(cart.id);
 
     return successResponse({ cart: await this.getCartFull(cart.id) });
@@ -174,6 +174,10 @@ export class CartService {
       where: { user_id: userId },
       select: { id: true, vendor_id: true, total: true, total_discount: true },
     });
+
+    if (cart && !cart.cart_products.length) {
+      await cart.remove();
+    }
 
     if (!cart) {
       cart = Cart.create({

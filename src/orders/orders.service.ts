@@ -14,29 +14,20 @@ import {
   PAYMENT_METHOD,
   PAYMENT_STATUS,
   SHIPPING_METHOD,
-  TRANSACTION_METHOD,
-  TRANSACTION_TYPE,
 } from '../enums/type.enum';
 import { Card } from '../cards/entities/card.entity';
 import usePaystackService from '../services/paystack';
 import { useGoogleMapServices } from '../services/map';
 import { Vendor } from '../vendors/entities/vendor.entity';
-import {
-  calDiscount,
-  generateTrackingCode,
-  getCheckoutFees,
-  getPaystackFee,
-} from '../utils';
+import { calDiscount, generateTrackingCode, getCheckoutFees } from '../utils';
 import { PaginationDto } from '../decorators/pagination-decorator';
 import { Timeline } from './entities/timeline.entity';
 import { OrderTimeline } from './entities/order_timeline.entity';
 import { OrderProduct } from './entities/order-products.entity';
 import { BankAccount } from '../bank_accounts/entities/bank_account.entity';
-import { TransactionsService } from '../transactions/transactions.service';
 import { UseOneSignal } from '../services/one-signal';
 import { QueueService } from '../queues/queue.service';
 import { usePusher } from '../services/pusher';
-import { Transaction } from '../transactions/entities/transaction.entity';
 import { DataSource } from 'typeorm';
 
 const { createSubaccount } = usePaystackService;
@@ -125,7 +116,13 @@ export class OrdersService {
     const { order, totalProfit, totalProductSold } =
       await this.dataSource.transaction(async (manager) => {
         let order = await manager.findOne(Order, {
-          where: { cart_id, user_id: user.id },
+          where: {
+            cart_id,
+            user_id: user.id,
+            vendor_id: vendor.id,
+            status: ORDER_STATUS.PENDING,
+            payment_status:PAYMENT_STATUS.PENDING
+          },
         });
         if (!order) {
           order = new Order();
@@ -378,6 +375,7 @@ export class OrdersService {
     }
     order.status = ORDER_STATUS.COMPLETED;
     order.is_active = false;
+    order.paid_at = new Date();
     await order.save();
     // this.processVendorEarning(order);
     const notify = async () => {
@@ -536,7 +534,7 @@ export class OrdersService {
     pagination: PaginationDto,
   ) {
     const { status } = query;
-    const conditions = {};
+    const conditions = { };
     if (status) {
       if (status !== ORDER_STATUS.ALL) {
         conditions['status'] = status;
@@ -566,7 +564,10 @@ export class OrdersService {
         user: { full_name: true, id: true, profile_picture: true },
       },
       where: conditions,
-      order: { created_at: 'DESC' },
+      order: {
+        paid_at: 'DESC',
+        created_at: 'DESC',
+      },
       skip: pagination.offset,
       take: pagination.limit,
     });
@@ -623,7 +624,10 @@ export class OrdersService {
         },
       },
       where: conditions,
-      order: { created_at: 'DESC' },
+      order: {
+        paid_at: 'DESC',
+        created_at: 'DESC',
+      },
       skip: pagination.offset,
       take: pagination.limit,
     });

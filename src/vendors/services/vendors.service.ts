@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CACDto, CreateVendorDto, VendorSearchDto } from '../dto/create-vendor.dto';
+import {
+  CACDto,
+  CreateVendorDto,
+  VendorSearchDto,
+} from '../dto/create-vendor.dto';
 import { UpdateVendorDto } from '../dto/update-vendor.dto';
 import { useGoogleMapServices } from '../../services/map';
 import { Vendor } from '../entities/vendor.entity';
@@ -7,7 +11,10 @@ import { returnErrorResponse, successResponse } from '../../utils/response';
 import { User } from '../../users/entities/user.entity';
 import { DataSource, Not } from 'typeorm';
 import { VendorCategory } from '../entities/category.entity';
-import { CreateProductDto, SearchProductsDto } from '../../products/dto/create-product.dto';
+import {
+  CreateProductDto,
+  SearchProductsDto,
+} from '../../products/dto/create-product.dto';
 import { PaginationDto } from '../../decorators/pagination-decorator';
 import { ProductsService } from '../../products/services/products.service';
 import { Product } from '../../products/entities/product.entity';
@@ -142,46 +149,50 @@ export class VendorsService {
       total_rating: true,
       rating_count: true,
       is_active: true,
-      cac:true,
-      address:true,
+      cac: true,
+      address: true,
       description: true,
     };
 
-   if (viewer.role === Role.ADMIN){
-     const [vendors, count] = await Vendor.findAndCount({
-       where: conditions,
-       take: pagination.limit,
-       skip: pagination.offset,
-       select,
-     });
-     for (const vendor of vendors) {
-       vendor['ratings'] = await Rating.find({
-         where: { vendor_id: vendor.id },
-         take: 1,
-         order: { created_at: 'DESC' },
-         relations: { user: true },
-         select: { user: { full_name: true, profile_picture: true, id: true } },
-       });
-     }
-     return successResponse({ vendors, total_rows: count });
-   } else{
-     const [vendors, count] = await Vendor.findAndCount({
-       where: conditions,
-       take: pagination.limit,
-       skip: pagination.offset,
-       select,
-     });
-     for (const vendor of vendors) {
-       vendor['ratings'] = await Rating.find({
-         where: { vendor_id: vendor.id },
-         take: 1,
-         order: { created_at: 'DESC' },
-         relations: { user: true },
-         select: { user: { full_name: true, profile_picture: true, id: true } },
-       });
-     }
-     return successResponse({ vendors, total_rows: count });
-   }
+    if (viewer.role === Role.ADMIN) {
+      const [vendors, count] = await Vendor.findAndCount({
+        where: conditions,
+        take: pagination.limit,
+        skip: pagination.offset,
+        select,
+      });
+      for (const vendor of vendors) {
+        vendor['ratings'] = await Rating.find({
+          where: { vendor_id: vendor.id },
+          take: 1,
+          order: { created_at: 'DESC' },
+          relations: { user: true },
+          select: {
+            user: { full_name: true, profile_picture: true, id: true },
+          },
+        });
+      }
+      return successResponse({ vendors, total_rows: count });
+    } else {
+      const [vendors, count] = await Vendor.findAndCount({
+        where: conditions,
+        take: pagination.limit,
+        skip: pagination.offset,
+        select,
+      });
+      for (const vendor of vendors) {
+        vendor['ratings'] = await Rating.find({
+          where: { vendor_id: vendor.id },
+          take: 1,
+          order: { created_at: 'DESC' },
+          relations: { user: true },
+          select: {
+            user: { full_name: true, profile_picture: true, id: true },
+          },
+        });
+      }
+      return successResponse({ vendors, total_rows: count });
+    }
   }
 
   async vendorsOwner(viewer: User) {
@@ -190,13 +201,14 @@ export class VendorsService {
   }
 
   async products(
-    @AuthUser() user:User,
+    @AuthUser() user: User,
     searchProductDto: SearchProductsDto,
     vendorId: string,
     pagination: PaginationDto,
   ) {
     searchProductDto.vendor = vendorId;
-    const { products, total_rows } = await this.productService.products(user,
+    const { products, total_rows } = await this.productService.products(
+      user,
       searchProductDto,
       pagination,
     );
@@ -266,7 +278,11 @@ export class VendorsService {
   }
 
   async removeProduct(productId: string, vendor: string, remover: User) {
-    const product = await this.productService.remove(productId, vendor, remover);
+    const product = await this.productService.remove(
+      productId,
+      vendor,
+      remover,
+    );
     await this.notificationService.createActivity(
       `${remover.full_name} deleted a product(${product.name})`,
       remover.id,
@@ -288,7 +304,7 @@ export class VendorsService {
       location,
       description,
       vendor_category_id,
-      vendor_id
+      vendor_id,
     } = updateVendorDto;
 
     vendorId = vendorId || vendor_id;
@@ -305,14 +321,14 @@ export class VendorsService {
     if (anotherVendorWithEmailExists)
       returnErrorResponse('A vendor with that email already exists');
     // ensure a different vendor does not have this phone number
-   if (owner.role != Role.ADMIN){
-     const anotherVendorWithPhoneExists = await Vendor.findOne({
-       where: { phone_number, owner_id: Not(owner.id) },
-       select: { id: true, phone_number: true, owner_id: true },
-     });
-     if (anotherVendorWithPhoneExists)
-       returnErrorResponse('A vendor with that email already exists');
-   }
+    if (owner.role != Role.ADMIN) {
+      const anotherVendorWithPhoneExists = await Vendor.findOne({
+        where: { phone_number, owner_id: Not(owner.id) },
+        select: { id: true, phone_number: true, owner_id: true },
+      });
+      if (anotherVendorWithPhoneExists)
+        returnErrorResponse('A vendor with that email already exists');
+    }
     const mapServices = useGoogleMapServices();
     const { state, address, country } = await mapServices.getStateFromLatAndLng(
       mapServices.formatLatAndLng(location.lat, location.lng),
@@ -355,6 +371,9 @@ export class VendorsService {
 
   async submitCaC(vendor: Vendor, cacDto: CACDto, takenBy: User) {
     vendor.cac = cacDto.cac_number;
+    if (cacDto.verification_type) {
+      vendor.verification_type = cacDto.verification_type;
+    }
     await vendor.save();
     this.notificationService.createActivity(
       `${takenBy.full_name} submitted vendor cac number for verification`,
