@@ -175,7 +175,7 @@ export class CartService {
       select: { id: true, vendor_id: true, total: true, total_discount: true },
     });
 
-    if (cart && !cart.cart_products.length) {
+    if ((cart && !cart.cart_products) || (cart && !cart.cart_products.length)) {
       await cart.remove();
     }
 
