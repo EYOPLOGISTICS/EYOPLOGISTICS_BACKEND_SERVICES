@@ -21,6 +21,7 @@ export class Order extends EyopBaseEntity{
     @Column({nullable:false})
     vendor_id:string
 
+    @Column({nullable:true})
     paid_at: Date;
 
     @Column({nullable:true})
