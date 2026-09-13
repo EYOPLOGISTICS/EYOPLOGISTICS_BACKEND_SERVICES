@@ -19,7 +19,7 @@ export class CategoriesController {
     return this.categoryService.createVendorCategory(createCategoryDto);
   }
 
-  @Post('vendor-categories/:id')
+  @Patch('vendor-categories/:id')
   editVendorCategory(
     @Param('id') id: string,
     @Body() createCategoryDto: CreateCategoryDto,
