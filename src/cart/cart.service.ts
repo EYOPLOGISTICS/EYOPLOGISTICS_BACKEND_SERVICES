@@ -171,6 +171,7 @@ export class CartService {
 
   async getCartMeta(userId: string): Promise<Cart> {
     let cart = await Cart.findOne({
+      relations:{cart_products:true},
       where: { user_id: userId },
       select: { id: true, vendor_id: true, total: true, total_discount: true },
     });
